@@ -1,0 +1,19 @@
+<div class="flex justify-center mb-4 mt-10 gap-4 px-8">
+	<p-carousel [value]="teamMembers()" [numVisible]="3" [numScroll]="1" [circular]="true" [responsiveOptions]="responsiveOptions()" autoplayInterval="2000" styleClass="w-full max-w-7xl">
+        <ng-template let-member #item>
+            <div class="border border-surface-200 dark:border-surface-700 rounded m-2 p-4 text-center">
+                <div class="mb-4">
+                    <div class="relative mx-auto w-32 h-32">
+                        <img [src]="member.image" [alt]="member.name" class="w-full h-full rounded-full object-cover" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-xl text-gray-800 dark:text-gray-200">{{ member.name }}</h3>
+                </div>
+                <div class="text-gray-600 dark:text-gray-400">
+                    <p>{{ member.role }}</p>
+                </div>
+            </div>
+        </ng-template>
+    </p-carousel>
+ </div>

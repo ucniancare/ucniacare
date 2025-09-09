@@ -1,0 +1,17 @@
+
+
+.fa-robot{
+    color: var(--p-gray-300);
+}
+.fa-cloud-arrow-up{
+    color: var(--p-blue-300);
+}
+.fa-lock{
+    color: var(--p-green-300);
+}
+.fa-universal-access{
+    color: var(--p-orange-300);
+}
+.fa-heart{
+    color: var(--p-red-300);
+}

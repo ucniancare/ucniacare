@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common';
 import { Ripple } from 'primeng/ripple';
 import { Menubar } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
-import { LandingPageContentComponent } from '../landing-page-content/landing-page-content.component';
 
 @Component({
     selector: 'landing-page-header',
@@ -19,7 +18,6 @@ import { LandingPageContentComponent } from '../landing-page-content/landing-pag
         Ripple, 
         CommonModule, 
         ButtonModule,
-        LandingPageContentComponent
     ],
     templateUrl: './landing-page-header.component.html',
     styleUrl: './landing-page-header.component.css',
