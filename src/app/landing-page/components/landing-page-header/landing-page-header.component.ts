@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { BadgeModule } from 'primeng/badge';
 import { AvatarModule } from 'primeng/avatar';
@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { Ripple } from 'primeng/ripple';
 import { Menubar } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
+import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'landing-page-header',
@@ -18,6 +19,7 @@ import { ButtonModule } from 'primeng/button';
         Ripple, 
         CommonModule, 
         ButtonModule,
+        RouterModule,
     ],
     templateUrl: './landing-page-header.component.html',
     styleUrl: './landing-page-header.component.css',
@@ -25,12 +27,13 @@ import { ButtonModule } from 'primeng/button';
 })
 export class LandingPageHeaderComponent implements OnInit  {
 
-    items: MenuItem[] | undefined;
+    protected items = signal<MenuItem[]>([]);
 
     ngOnInit() {
-        this.items = [
+        this.items.set([
             {
                 label: 'Home',
+                routerLink: ''
             },
             {
                 label: 'Features',
@@ -39,7 +42,8 @@ export class LandingPageHeaderComponent implements OnInit  {
                 label: 'Contact Us',
             },
             {
-                label: 'About Us'
+                label: 'About Us',
+                routerLink: '/about-us'
             }
             /*{
                 label: 'Features',
@@ -66,7 +70,7 @@ export class LandingPageHeaderComponent implements OnInit  {
                     },
                 ],
             },*/
-        ];
+        ]);
     }
 
 }

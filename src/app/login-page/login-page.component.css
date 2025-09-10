@@ -1,0 +1,10 @@
+.login-card{
+    width: 50px;
+}
+.sign-up-text{
+    color: var(--p-blue-500);
+    cursor: pointer;
+}
+.sign-up-text:hover{
+    text-decoration: underline;
+}
