@@ -39,34 +39,4 @@ export class LoginPageComponent {
 
     }
 
-    protected addUser(): void {
-
-        const newUser: User = {
-            name: 'Test 2',
-            email: 'Test 2',
-            password: 'Test 2'
-        };
-        this.firebaseService.addData$<User>('users', newUser, UserModel.toJson, UserModel.fromJson).pipe(
-            tap((user) => {
-                this.addedUser.set(user);
-            }),
-            catchError(err => {
-                return of(null);
-            })
-        ).subscribe();
-    }
-
-    protected getAllUsers(): void {
-        this.firebaseService.getAllData$<User>('users', UserModel.fromJson).pipe(
-            tap((users: User[]) => {
-                this.allUsers.set(users);
-            }),
-            catchError(err => {
-                return of(null);
-            })
-        ).subscribe();
-    }
-
-
-
 }

@@ -12,29 +12,6 @@
         <p-button label="Forgot Password?" link />
     </div>
     <div class="mt-2">
-        <p-button (click)="addUser()" label="Add User" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" />
-        <p-button (click)="getAllUsers()" label="Get All Users" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" />
-
+        <p-button label="Login" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" />
     </div>
-
-    <div class="mt-4 flex justify-center">
-        <p>Don't have an account?</p><p class="ml-2 sign-up-text">Sign up!</p>
-    </div>
-    
-
-    <div>
-        <p>User added</p>
-        <p>User added: {{ addedUser()?.name }}</p>
-        <p>User added: {{ addedUser()?.email }}</p>
-        <p>User added: {{ addedUser()?.password }}</p>
-        <p>User added: {{ addedUser()?.createdAt }}</p>
-        <p>User added: {{ addedUser()?.id }}</p>
-
-    </div>
-
-    <div>
-        <p>All Users</p>
-        <p *ngFor="let user of allUsers()">{{ user.name }} - {{ user.email }} - {{ user.password }} - {{ user.createdAt }} - {{ user.id }}</p>
-    </div>
-
 </div>
