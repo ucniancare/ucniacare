@@ -4,6 +4,8 @@ import { SideBarMenuComponent } from './shared-components/side-bar-menu/side-bar
 import { filter, map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { TopToolbarComponent } from './shared-components/top-toolbar/top-toolbar.component';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-root',
@@ -11,11 +13,15 @@ import { TopToolbarComponent } from './shared-components/top-toolbar/top-toolbar
         RouterOutlet,
         SideBarMenuComponent,
         CommonModule,
-        TopToolbarComponent
+        TopToolbarComponent,
+        ToastModule
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',
     standalone: true,
+    providers: [
+        MessageService
+    ]
 })
 export class AppComponent {
 

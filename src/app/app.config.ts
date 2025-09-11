@@ -11,9 +11,11 @@ import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { environment } from './keys/environment';
 import { provideAuth } from '@angular/fire/auth';
 import { getAuth } from '@angular/fire/auth';
+import { MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        MessageService,
         provideFirebaseApp(() => initializeApp(environment.firebase)),
         provideAuth(() => getAuth()),
         provideFirestore(() => getFirestore()),

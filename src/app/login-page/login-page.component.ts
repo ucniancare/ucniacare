@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { FirebaseService } from '../shared-services/firebase.service';
 import { User } from '../shared-interfaces/user';
 import { Router } from '@angular/router';
-
+import { MessageService } from 'primeng/api';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -36,10 +36,13 @@ export class LoginPageComponent {
 
     constructor(
         private firebaseService: FirebaseService, 
-        private router: Router) {
+        private router: Router,
+        private messageService: MessageService
+    ) {
     }
 
     protected login(): void {
+        this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
         this.router.navigate(['/dashboard']);
     }
 
