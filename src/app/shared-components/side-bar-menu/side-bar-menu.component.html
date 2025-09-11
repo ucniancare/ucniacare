@@ -1,0 +1,15 @@
+<div class="card">
+    <p-menu [model]="items" class="flex" styleClass="w-[320px] h-[100vh]">
+        <ng-template #start>
+            <span class="flex items-center justify-center w-full gap-1 px-2 py-2 mt-16 mb-10">
+                <span class="text-xl font-semibold">UCNIACARE</span>
+            </span>
+        </ng-template>
+        <ng-template #item let-item>
+            <a pRipple class="flex items-center p-menu-item-link ml-8 mb-8">
+                <span [class]="item.icon"></span>
+                <span class="ml-2">{{ item.label }}</span>
+            </a>
+        </ng-template>
+    </p-menu>
+</div>

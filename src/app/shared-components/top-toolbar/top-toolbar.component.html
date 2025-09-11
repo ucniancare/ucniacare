@@ -1,4 +1,4 @@
-<p-menubar [model]="items()">
+<p-menubar>
     <ng-template #start>
     </ng-template>
     <ng-template #item let-item let-root="root">
@@ -10,9 +10,11 @@
         </a>
     </ng-template>
     <ng-template #end>
-        <div class="flex items-center gap-2">
-            <!-- <input type="text" pInputText placeholder="Search test" class="w-36" /> -->
-            <p-button label="Login" severity="info" size="small" routerLink="/login" />
+        <div class="flex items-center gap-2 mr-4">
+            <div class="flex items-center">
+                <p-button icon="fa-solid fa-circle-user text-2xl" label="Clifford Alferez" size="small" severity="secondary" />
+
+            </div>
         </div>
     </ng-template>
 </p-menubar>

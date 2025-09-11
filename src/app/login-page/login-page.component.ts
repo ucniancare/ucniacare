@@ -7,9 +7,8 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FirebaseService } from '../shared-services/firebase.service';
-import { catchError, of, tap } from 'rxjs';
 import { User } from '../shared-interfaces/user';
-import { UserModel } from '../shared-models/user.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-login-page',
@@ -20,7 +19,7 @@ import { UserModel } from '../shared-models/user.model';
         CardModule,
         FloatLabelModule,
         CommonModule,
-        FormsModule
+        FormsModule,
     ],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.css',
@@ -35,8 +34,13 @@ export class LoginPageComponent {
     protected addedUser = signal<User | null>(null);
     protected allUsers = signal<User[]>([]);
 
-    constructor(private firebaseService: FirebaseService) {
+    constructor(
+        private firebaseService: FirebaseService, 
+        private router: Router) {
+    }
 
+    protected login(): void {
+        this.router.navigate(['/dashboard']);
     }
 
 }

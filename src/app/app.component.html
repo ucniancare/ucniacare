@@ -1,1 +1,11 @@
-<router-outlet></router-outlet>
+<div class="flex h-screen overflow-hidden">
+    <side-bar-menu *ngIf="showSideBarMenu()" class="shrink-0 sticky top-0 h-screen"></side-bar-menu>
+
+    <div class="flex-1 overflow-y-auto">
+        <div *ngIf="showTopToolbar()" class="sticky top-0 z-50">
+            <top-toolbar class="shrink-0 sticky top-0 z-50"></top-toolbar>
+        </div>
+
+        <router-outlet></router-outlet>
+    </div>
+</div>

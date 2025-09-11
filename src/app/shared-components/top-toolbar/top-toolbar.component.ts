@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { RouterModule } from '@angular/router';
 
 @Component({
-    selector: 'landing-page-header',
+    selector: 'top-toolbar',
     imports: [
         Menubar, 
         BadgeModule, 
@@ -21,31 +21,12 @@ import { RouterModule } from '@angular/router';
         ButtonModule,
         RouterModule,
     ],
-    templateUrl: './landing-page-header.component.html',
-    styleUrl: './landing-page-header.component.css',
+    templateUrl: './top-toolbar.component.html',
+    styleUrl: './top-toolbar.component.css',
     standalone: true
 })
-export class LandingPageHeaderComponent implements OnInit  {
-
-    protected items = signal<MenuItem[]>([]);
+export class TopToolbarComponent implements OnInit {
 
     ngOnInit() {
-        this.items.set([
-            {
-                label: 'Home',
-                routerLink: ''
-            },
-            {
-                label: 'Features',
-            },
-            {
-                label: 'Contact Us',
-            },
-            {
-                label: 'About Us',
-                routerLink: '/about-us'
-            }
-        ]);
     }
-
 }
