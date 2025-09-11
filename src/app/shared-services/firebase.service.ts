@@ -11,6 +11,14 @@ export class FirebaseService {
 
     }
 
+    /**
+     * Adds a new document to a Firestore collection
+     * @param collectionName - The name of the Firestore collection
+     * @param data - The data object to add to the collection
+     * @param toJson - Optional function to transform data before saving to Firestore
+     * @param fromJson - Optional function to transform data after retrieving from Firestore
+     * @returns Observable of the added data with id, createdAt, and updatedAt fields
+     */
     public addData$<T extends object>(collectionName: string, data: T, toJson?: (data: T) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; createdAt: Date, updatedAt: Date }> {
         const ref = collection(this.firestore, collectionName);
         const createdAt = new Date();
@@ -29,6 +37,12 @@ export class FirebaseService {
         );
     }
 
+    /**
+     * Retrieves all documents from a Firestore collection
+     * @param collectionName - The name of the Firestore collection
+     * @param fromJson - Optional function to transform data after retrieving from Firestore
+     * @returns Observable of an array of documents with id, createdAt, and updatedAt fields
+     */
     public getAllData$<T extends object>(collectionName: string, fromJson?: (json: any, id?: string) => T): Observable<(T & { id: string; createdAt: Date, updatedAt: Date })[]> {
         const ref = collection(this.firestore, collectionName);
 
@@ -42,6 +56,15 @@ export class FirebaseService {
         );
     }
 
+    /**
+     * Updates an existing document in a Firestore collection
+     * @param collectionName - The name of the Firestore collection
+     * @param id - The ID of the document to update
+     * @param data - The partial data object containing fields to update
+     * @param toJson - Optional function to transform data before saving to Firestore
+     * @param fromJson - Optional function to transform data after retrieving from Firestore
+     * @returns Observable of the updated data with id and updatedAt fields
+     */
     public updateData$<T extends object>(collectionName: string, id: string, data: Partial<T>, toJson?: (data: Partial<T>) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; updatedAt: Date }> {
         const docRef = doc(this.firestore, `${collectionName}/${id}`);
         const updatedAt = new Date();
@@ -64,6 +87,13 @@ export class FirebaseService {
         );
     }
 
+    /**
+     * Retrieves a specific document from a Firestore collection by ID
+     * @param collectionName - The name of the Firestore collection
+     * @param id - The ID of the document to retrieve
+     * @param fromJson - Optional function to transform data after retrieving from Firestore
+     * @returns Observable of the document data with id field
+     */
     public getData$<T extends object>(collectionName: string, id: string, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string }> {
         const docRef = doc(this.firestore, `${collectionName}/${id}`);
 
@@ -79,6 +109,12 @@ export class FirebaseService {
         );
     }
 
+    /**
+     * Deletes a specific document from a Firestore collection by ID
+     * @param collectionName - The name of the Firestore collection
+     * @param id - The ID of the document to delete
+     * @returns Observable that completes when the document is deleted
+     */
     public deleteData$(collectionName: string, id: string): Observable<void> {
         const docRef = doc(this.firestore, `${collectionName}/${id}`);
 
