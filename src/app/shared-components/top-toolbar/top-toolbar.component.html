@@ -11,9 +11,9 @@
     </ng-template>
     <ng-template #end>
         <div class="flex items-center gap-2 mr-4">
-            <div class="flex items-center">
-                <p-button icon="fa-solid fa-circle-user text-2xl" label="Clifford Alferez" size="small" severity="secondary" />
-
+            <div class="card flex justify-center">
+                <p-menu #menu [model]="items" [popup]="true" appendTo="body"/>
+                <p-button (click)="menu.toggle($event)" icon="fa-solid fa-user" size="large" class="ml-2" severity="secondary" />
             </div>
         </div>
     </ng-template>

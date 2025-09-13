@@ -1,5 +1,5 @@
 import { Timestamp } from "@angular/fire/firestore";
-import { User } from "../shared-interfaces/user";
+import { User } from "../shared-interfaces/user-account";
 
 
 export class UserModel {

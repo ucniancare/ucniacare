@@ -5,6 +5,7 @@ import { from, map, Observable, switchMap } from 'rxjs';
 @Injectable({
     providedIn: 'root'
 })
+
 export class FirebaseService {
 
     constructor(private firestore: Firestore) {

@@ -7,7 +7,6 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FirebaseService } from '../shared-services/firebase.service';
-import { User } from '../shared-interfaces/user';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 @Component({
@@ -23,16 +22,13 @@ import { MessageService } from 'primeng/api';
     ],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.css',
-    standalone: true
+    standalone: true,
 })
 export class LoginPageComponent {
 
 
     protected username: string = '';
     protected password: string = '';
-
-    protected addedUser = signal<User | null>(null);
-    protected allUsers = signal<User[]>([]);
 
     constructor(
         private firebaseService: FirebaseService, 

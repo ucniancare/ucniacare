@@ -1,3 +1,13 @@
 :host ::ng-deep .p-menu {
     border-radius: 0px !important;
 }
+a.active {
+    background: var(--p-info-color) !important;
+    color: var(--p-info-color-text) !important;
+    font-weight: 800;
+    border-radius: 4px;
+}
+
+.padding-force{
+    padding-left: 42px;
+}
