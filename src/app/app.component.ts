@@ -6,7 +6,9 @@ import { CommonModule } from '@angular/common';
 import { TopToolbarComponent } from './shared-components/top-toolbar/top-toolbar.component';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-
+import { SpinnerOverlayComponent } from './shared-components/spinner-overlay/spinner-overlay.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressBarOverlayComponent } from './shared-components/progress-bar-overlay/progress-bar-overlay.component';
 @Component({
     selector: 'app-root',
     imports: [
@@ -14,7 +16,10 @@ import { MessageService } from 'primeng/api';
         SideBarMenuComponent,
         CommonModule,
         TopToolbarComponent,
-        ToastModule
+        ToastModule,
+        SpinnerOverlayComponent,
+        ProgressBarModule,
+        ProgressBarOverlayComponent
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',

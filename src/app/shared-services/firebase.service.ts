@@ -1,14 +1,20 @@
 import { Injectable } from '@angular/core';
-import { addDoc, collection, collectionData, deleteDoc, doc, Firestore, getDoc, getDocs, serverTimestamp, updateDoc } from '@angular/fire/firestore';
-import { from, map, Observable, switchMap } from 'rxjs';
+import { addDoc, collection, collectionData, deleteDoc, doc, Firestore, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from '@angular/fire/firestore';
+import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { COLLECTION } from '../constants/firebase-collection.constants';
+import { UserAccount } from '../shared-interfaces/user-account';
+import { MessageService } from 'primeng/api';
 
 @Injectable({
     providedIn: 'root'
 })
 
-export class FirebaseService {
+export default class FirebaseService {
 
-    constructor(private firestore: Firestore) {
+    constructor(
+        private firestore: Firestore,
+        private messageService: MessageService
+    ) {
 
     }
 
@@ -18,22 +24,20 @@ export class FirebaseService {
      * @param data - The data object to add to the collection
      * @param toJson - Optional function to transform data before saving to Firestore
      * @param fromJson - Optional function to transform data after retrieving from Firestore
-     * @returns Observable of the added data with id, createdAt, and updatedAt fields
+     * @returns Observable of the added data with id
      */
-    public addData$<T extends object>(collectionName: string, data: T, toJson?: (data: T) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; createdAt: Date, updatedAt: Date }> {
+    public addData$<T extends object>(collectionName: string, data: T, toJson?: (data: T) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; }> {
         const ref = collection(this.firestore, collectionName);
-        const createdAt = new Date();
 
         return from(
             addDoc(ref, {
                 ...(toJson ? toJson(data) : data),
-                createdAt
             })
         ).pipe(
             map(docRef => {
-                const raw = { id: docRef.id, ...data, createdAt };
+                const raw = { id: docRef.id, ...data, };
                 const mapped = fromJson ? fromJson(raw, docRef.id) : raw;
-                return mapped as T & { id: string; createdAt: Date, updatedAt: Date };
+                return mapped as T & { id: string; };
             })
         );
     }
@@ -42,16 +46,16 @@ export class FirebaseService {
      * Retrieves all documents from a Firestore collection
      * @param collectionName - The name of the Firestore collection
      * @param fromJson - Optional function to transform data after retrieving from Firestore
-     * @returns Observable of an array of documents with id, createdAt, and updatedAt fields
+     * @returns Observable of an array of documents with id
      */
-    public getAllData$<T extends object>(collectionName: string, fromJson?: (json: any, id?: string) => T): Observable<(T & { id: string; createdAt: Date, updatedAt: Date })[]> {
+    public getAllData$<T extends object>(collectionName: string, fromJson?: (json: any, id?: string) => T): Observable<(T & { id: string; })[]> {
         const ref = collection(this.firestore, collectionName);
 
         return collectionData(ref, { idField: 'id' }).pipe(
             map(docs =>
                 docs.map(doc => {
                     const mapped = fromJson ? fromJson(doc, (doc as any).id) : doc;
-                    return mapped as T & { id: string; createdAt: Date, updatedAt: Date };
+                    return mapped as T & { id: string; };
                 })
             )
         );
@@ -64,16 +68,14 @@ export class FirebaseService {
      * @param data - The partial data object containing fields to update
      * @param toJson - Optional function to transform data before saving to Firestore
      * @param fromJson - Optional function to transform data after retrieving from Firestore
-     * @returns Observable of the updated data with id and updatedAt fields
+     * @returns Observable of the updated data with id
      */
-    public updateData$<T extends object>(collectionName: string, id: string, data: Partial<T>, toJson?: (data: Partial<T>) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; updatedAt: Date }> {
+    public updateData$<T extends object>(collectionName: string, id: string, data: Partial<T>, toJson?: (data: Partial<T>) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; }> {
         const docRef = doc(this.firestore, `${collectionName}/${id}`);
-        const updatedAt = new Date();
 
         return from(
             updateDoc(docRef, {
                 ...(toJson ? toJson(data) : data),
-                updatedAt
             })
         ).pipe(
             switchMap(() => from(getDoc(docRef))),
@@ -83,7 +85,7 @@ export class FirebaseService {
                 }
                 const raw = { id: snapshot.id, ...snapshot.data() } as any;
                 const mapped = fromJson ? fromJson(raw, snapshot.id) : raw;
-                return mapped as T & { id: string; updatedAt: Date };
+                return mapped as T & { id: string; };
             })
         );
     }
@@ -122,6 +124,29 @@ export class FirebaseService {
         return from(deleteDoc(docRef));
     }
 
+    public authenticateUser$(ucIdNumber: string, password: string): Observable<UserAccount | null> {
+        const usersRef = collection(this.firestore, COLLECTION.USERACCOUNTS.COLLECTIONNAME);
+
+        const q = query(
+            usersRef,
+            where('ucIdNumber', '==', ucIdNumber),
+            where('password', '==', password)
+        );
+
+        return from(getDocs(q)).pipe(
+            map(snapshot => {
+                if (snapshot.empty) {
+                    return null;
+                }
+                const doc = snapshot.docs[0];
+                return { id: doc.id, ...doc.data() } as UserAccount;
+            }),
+            catchError(err => {
+                this.messageService.add({ severity: 'error', summary: 'Error!', detail: err });
+                return of(null);
+            })
+        );
+    }
 
 
 

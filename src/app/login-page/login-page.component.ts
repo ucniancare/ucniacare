@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,9 +6,19 @@ import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FirebaseService } from '../shared-services/firebase.service';
+import FirebaseService from '../shared-services/firebase.service';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { UserAccount } from '../shared-interfaces/user-account';
+import { UserAccountModel } from '../shared-models/user-account.model';
+import { catchError, finalize, of, tap } from 'rxjs';
+import { COLLECTION } from '../constants/firebase-collection.constants';
+import { UserAuthService } from '../shared-services/user-auth.service';
+import { MessageModule } from 'primeng/message';
+import { LocalStorageService } from '../shared-services/local-storage.service';
+import { SpinnerOverlayService } from '../shared-services/spinner-overlay.service';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressBarOverlayService } from '../shared-services/progress-bar-overlay.service';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -19,6 +29,8 @@ import { MessageService } from 'primeng/api';
         FloatLabelModule,
         CommonModule,
         FormsModule,
+        MessageModule,
+        ProgressBarModule
     ],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.css',
@@ -27,19 +39,72 @@ import { MessageService } from 'primeng/api';
 export class LoginPageComponent {
 
 
-    protected username: string = '';
+    protected idNumber: string = '';
     protected password: string = '';
+
+    protected loginErrorMessage = signal<string>('');
+    protected isLoading = signal<boolean>(false);
 
     constructor(
         private firebaseService: FirebaseService, 
         private router: Router,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private userAuthService: UserAuthService,
+        private localStorageService: LocalStorageService,
+        private spinnerOverlayService: SpinnerOverlayService,
+        private progressBarOverlayService: ProgressBarOverlayService
     ) {
     }
 
     protected login(): void {
-        this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
-        this.router.navigate(['/dashboard']);
+        this.isLoading.set(true);
+        //this.spinnerOverlayService.show('Logging in...');
+        this.progressBarOverlayService.show();
+        this.firebaseService.authenticateUser$(this.idNumber, this.password).pipe(
+            tap(user => {
+                if (user) {
+                    this.localStorageService.set(COLLECTION.USERACCOUNTS.COLLECTIONNAME, user);
+                    this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
+                    this.router.navigate(['/dashboard']);
+                    this.loginErrorMessage.set('');
+                } 
+                
+                else {
+                    this.loginErrorMessage.set('Invalid ID number or password.');
+                }
+            }),
+            finalize(() => {
+                //this.spinnerOverlayService.hide();
+                this.progressBarOverlayService.hide();
+                this.isLoading.set(false);
+            })
+        ).subscribe();
+    }
+
+    public addUserForTesting(): void {
+        const userAccount: UserAccount = {
+            id: '1',
+            ucIdNumber: '123123123',
+            password: 'admin',
+            metaData: {
+                createdAt: new Date(),
+                createdBy: '123123123',
+                updatedAt: new Date(),
+                updatedBy: '123123123'
+            }
+        }
+
+        this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount, UserAccountModel.toJson, UserAccountModel.fromJson).pipe(
+            tap(user => console.log('user added: ', user)),
+            catchError(err => {
+                return of(null);
+            })
+        ).subscribe();
+    
+    }
+
+    protected disableLoginButton(): boolean {
+        return !this.idNumber || !this.password || this.isLoading();
     }
 
 }
