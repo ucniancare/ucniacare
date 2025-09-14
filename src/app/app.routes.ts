@@ -32,7 +32,7 @@ export const routes: Routes = [
             sideBarMenu: false, 
             topToolbar: false 
         },
-        //canActivate: [LoginGuardService]
+        canActivate: [LoginGuardService]
     },
     { 
         path: 'dashboard', 

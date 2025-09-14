@@ -7,8 +7,9 @@ import { CommonModule } from '@angular/common';
 import { Ripple } from 'primeng/ripple';
 import { Menubar } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
+import { UserAuthService } from '../../shared-services/user-auth.service';
 
 @Component({
     selector: 'top-toolbar',
@@ -31,27 +32,39 @@ export class TopToolbarComponent implements OnInit {
 
     protected items: MenuItem[] = [];
 
-    ngOnInit() {
+    constructor(
+        private userAuthService: UserAuthService,
+        private router: Router
+    ) {
+    }
+
+    ngOnInit() {    
         this.items = [
             {
                 label: 'Clifford Alferez',
                 items: [
                     {
                         label: 'Notifications',
-                        icon: 'fa-solid fa-bell'
+                        icon: 'fa-solid fa-bell',
                     },
                     {
                         label: 'Logout',
-                        icon: 'fa-solid fa-right-from-bracket'
+                        icon: 'fa-solid fa-right-from-bracket',
+                        command: () => {
+                            this.logout();
+                        }
                     },
                 ]
             }
         ];
     }
 
-    onUserMenuToggle(event: Event, menu: any) {
-        console.log("Test")
-        event.stopPropagation();   // 👈 prevent menubar from closing it
-        menu.toggle(event);
-      }
+
+    private logout(): void {
+        console.log('log out');
+        this.userAuthService.logoutUser();
+        this.router.navigate(['/login']);
+    }
+
+
 }

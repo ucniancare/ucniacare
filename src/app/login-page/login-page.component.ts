@@ -52,33 +52,49 @@ export class LoginPageComponent {
         private userAuthService: UserAuthService,
         private localStorageService: LocalStorageService,
         private spinnerOverlayService: SpinnerOverlayService,
-        private progressBarOverlayService: ProgressBarOverlayService
+        private progressBarOverlayService: ProgressBarOverlayService,
     ) {
     }
 
     protected login(): void {
         this.isLoading.set(true);
-        //this.spinnerOverlayService.show('Logging in...');
         this.progressBarOverlayService.show();
-        this.firebaseService.authenticateUser$(this.idNumber, this.password).pipe(
+        this.userAuthService.loginUser(this.idNumber, this.password).pipe(
             tap(user => {
+                console.log("user", user);
                 if (user) {
                     this.localStorageService.set(COLLECTION.USERACCOUNTS.COLLECTIONNAME, user);
                     this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
                     this.router.navigate(['/dashboard']);
-                    this.loginErrorMessage.set('');
-                } 
-                
+                }
                 else {
                     this.loginErrorMessage.set('Invalid ID number or password.');
                 }
             }),
             finalize(() => {
-                //this.spinnerOverlayService.hide();
                 this.progressBarOverlayService.hide();
                 this.isLoading.set(false);
             })
         ).subscribe();
+        // this.firebaseService.authenticateUser$(this.idNumber, this.password).pipe(
+        //     tap(user => {
+        //         if (user) {
+        //             this.localStorageService.set(COLLECTION.USERACCOUNTS.COLLECTIONNAME, user);
+        //             this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
+        //             this.router.navigate(['/dashboard']);
+        //             this.loginErrorMessage.set('');
+        //         } 
+                
+        //         else {
+        //             this.loginErrorMessage.set('Invalid ID number or password.');
+        //         }
+        //     }),
+        //     finalize(() => {
+        //         //this.spinnerOverlayService.hide();
+        //         this.progressBarOverlayService.hide();
+        //         this.isLoading.set(false);
+        //     })
+        // ).subscribe();
     }
 
     public addUserForTesting(): void {

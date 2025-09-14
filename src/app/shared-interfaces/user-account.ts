@@ -5,5 +5,4 @@ export interface UserAccount {
     ucIdNumber?: string;
     password?: string;
     metaData?: MetaData;
-
 }
