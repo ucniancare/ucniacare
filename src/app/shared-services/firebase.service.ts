@@ -4,6 +4,9 @@ import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { COLLECTION } from '../constants/firebase-collection.constants';
 import { UserAccount } from '../shared-interfaces/user-account';
 import { MessageService } from 'primeng/api';
+import { UserService } from './user.service';
+import { APPCONSTS } from '../constants/data.constants';
+import { DataSecurityService } from './data-security.service';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +16,9 @@ export default class FirebaseService {
 
     constructor(
         private firestore: Firestore,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private userService: UserService,
+        private dataSecurityService: DataSecurityService
     ) {
 
     }
@@ -72,12 +77,13 @@ export default class FirebaseService {
      */
     public updateData$<T extends object>(collectionName: string, id: string, data: Partial<T>, toJson?: (data: Partial<T>) => any, fromJson?: (json: any, id?: string) => T): Observable<T & { id: string; }> {
         const docRef = doc(this.firestore, `${collectionName}/${id}`);
+        const updatedData = {
+            ...(toJson ? toJson(data) : data),
+            "metaData.updatedAt": serverTimestamp(),
+            "metaData.updatedBy": this.userService.getCurrentUser()?.id || APPCONSTS.SYSTEM,
+        };
 
-        return from(
-            updateDoc(docRef, {
-                ...(toJson ? toJson(data) : data),
-            })
-        ).pipe(
+        return from(updateDoc(docRef, updatedData)).pipe(
             switchMap(() => from(getDoc(docRef))),
             map(snapshot => {
                 if (!snapshot.exists()) {
@@ -85,7 +91,7 @@ export default class FirebaseService {
                 }
                 const raw = { id: snapshot.id, ...snapshot.data() } as any;
                 const mapped = fromJson ? fromJson(raw, snapshot.id) : raw;
-                return mapped as T & { id: string; };
+                return mapped as T & { id: string };
             })
         );
     }
@@ -126,20 +132,22 @@ export default class FirebaseService {
 
     public authenticateUser$(ucIdNumber: string, password: string): Observable<UserAccount | null> {
         const usersRef = collection(this.firestore, COLLECTION.USERACCOUNTS.COLLECTIONNAME);
-
-        const q = query(
-            usersRef,
-            where('ucIdNumber', '==', ucIdNumber),
-            where('password', '==', password)
-        );
+        const q = query(usersRef, where('ucIdNumber', '==', ucIdNumber));
 
         return from(getDocs(q)).pipe(
             map(snapshot => {
                 if (snapshot.empty) {
                     return null;
                 }
+
                 const doc = snapshot.docs[0];
-                return { id: doc.id, ...doc.data() } as UserAccount;
+                const user = { id: doc.id, ...doc.data() } as UserAccount;
+                const decrypted = this.dataSecurityService.decrypData(user.password!);
+                if (decrypted === password) {
+                    return user;
+                }
+
+                return null;
             }),
             catchError(err => {
                 this.messageService.add({ severity: 'error', summary: 'Error!', detail: err });
@@ -147,6 +155,7 @@ export default class FirebaseService {
             })
         );
     }
+
 
 
 

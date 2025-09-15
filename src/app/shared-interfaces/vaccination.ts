@@ -6,6 +6,7 @@ export class Vaccination {
     name?: string;
     manufacturer?: string;
     doseNumber?: string;
+    doseType?: string;
     dateGiven?: string;
     notes?: string;
     files?: string[];

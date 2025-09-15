@@ -8,5 +8,8 @@ export const environment = {
         messagingSenderId: "680647235587",
         appId: "1:680647235587:web:a49a11412c7b2239455636",
         measurementId: "G-0Y71MMGQ9D"
+    },
+    cryptoJS: {
+        encryptionKey: "Ucn!c@r3C@p$t0n3K3y"
     }
 }

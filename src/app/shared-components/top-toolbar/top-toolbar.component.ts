@@ -10,6 +10,8 @@ import { ButtonModule } from 'primeng/button';
 import { Router, RouterModule } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { UserAuthService } from '../../shared-services/user-auth.service';
+import { ProgressBarOverlayService } from '../../shared-services/progress-bar-overlay.service';
+import { catchError, finalize, of, tap } from 'rxjs';
 
 @Component({
     selector: 'top-toolbar',
@@ -34,6 +36,7 @@ export class TopToolbarComponent implements OnInit {
 
     constructor(
         private userAuthService: UserAuthService,
+        private progressBarOverlayService: ProgressBarOverlayService,
         private router: Router
     ) {
     }
@@ -61,9 +64,23 @@ export class TopToolbarComponent implements OnInit {
 
 
     private logout(): void {
-        console.log('log out');
-        this.userAuthService.logoutUser();
-        this.router.navigate(['/login']);
+        this.progressBarOverlayService.show();
+        this.userAuthService.logoutUser().pipe(
+            tap(success => {
+                if (success) {
+                    this.router.navigate(['/login']);
+                }
+                else {
+                    // TODO#1: Handle error
+                }
+            }),
+            catchError(() => {
+                return of(false);
+            }),
+            finalize(() => {
+                this.progressBarOverlayService.hide();
+            })
+        ).subscribe();
     }
 
 

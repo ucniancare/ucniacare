@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -19,6 +19,7 @@ import { LocalStorageService } from '../shared-services/local-storage.service';
 import { SpinnerOverlayService } from '../shared-services/spinner-overlay.service';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressBarOverlayService } from '../shared-services/progress-bar-overlay.service';
+import { DataSecurityService } from '../shared-services/data-security.service';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -36,7 +37,7 @@ import { ProgressBarOverlayService } from '../shared-services/progress-bar-overl
     styleUrl: './login-page.component.css',
     standalone: true,
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit{
 
 
     protected idNumber: string = '';
@@ -53,7 +54,11 @@ export class LoginPageComponent {
         private localStorageService: LocalStorageService,
         private spinnerOverlayService: SpinnerOverlayService,
         private progressBarOverlayService: ProgressBarOverlayService,
+        private dataSecurityService: DataSecurityService
     ) {
+    }
+
+    ngOnInit(): void {
     }
 
     protected login(): void {
@@ -61,9 +66,7 @@ export class LoginPageComponent {
         this.progressBarOverlayService.show();
         this.userAuthService.loginUser(this.idNumber, this.password).pipe(
             tap(user => {
-                console.log("user", user);
                 if (user) {
-                    this.localStorageService.set(COLLECTION.USERACCOUNTS.COLLECTIONNAME, user);
                     this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
                     this.router.navigate(['/dashboard']);
                 }
@@ -76,32 +79,15 @@ export class LoginPageComponent {
                 this.isLoading.set(false);
             })
         ).subscribe();
-        // this.firebaseService.authenticateUser$(this.idNumber, this.password).pipe(
-        //     tap(user => {
-        //         if (user) {
-        //             this.localStorageService.set(COLLECTION.USERACCOUNTS.COLLECTIONNAME, user);
-        //             this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
-        //             this.router.navigate(['/dashboard']);
-        //             this.loginErrorMessage.set('');
-        //         } 
-                
-        //         else {
-        //             this.loginErrorMessage.set('Invalid ID number or password.');
-        //         }
-        //     }),
-        //     finalize(() => {
-        //         //this.spinnerOverlayService.hide();
-        //         this.progressBarOverlayService.hide();
-        //         this.isLoading.set(false);
-        //     })
-        // ).subscribe();
     }
 
     public addUserForTesting(): void {
+        const password = '123';
         const userAccount: UserAccount = {
-            id: '1',
-            ucIdNumber: '123123123',
-            password: 'admin',
+            ucIdNumber: 'admin',
+            password: this.dataSecurityService.encrypData(password),
+            isLoggedIn: false,
+            lastLogin: new Date(),
             metaData: {
                 createdAt: new Date(),
                 createdBy: '123123123',

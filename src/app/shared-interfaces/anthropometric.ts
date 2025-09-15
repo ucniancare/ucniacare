@@ -6,5 +6,6 @@ export class Anthropometric {
     height?: string;
     weight?: string;
     bmi?: string;
+    bmiCategory?: string;
     metaData?: MetaData
 }
