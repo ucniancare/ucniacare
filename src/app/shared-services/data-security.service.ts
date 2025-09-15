@@ -22,9 +22,4 @@ export class DataSecurityService {
             return '';
         }
     }
-
-    public verifyPassword(plain: string, encryptedStored: string): boolean {
-        const storedPlain = this.decrypData(encryptedStored);
-        return storedPlain === plain;
-    }
 }
