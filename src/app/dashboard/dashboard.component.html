@@ -4,7 +4,7 @@
         <p-button label="Add Appointment" severity="primary" icon="fa-solid fa-calendar-plus" iconPos="left" />
     </div>
     <div class="flex gap-4">
-        <basic-data-card *ngFor="let card of basicDataCards()" [icon]="card.icon" [iconClass]="card.iconClass"
+        <basic-data-card *ngFor="let card of basicDataCards()" [cardClass]="card.cardClass" [icon]="card.icon" [iconClass]="card.iconClass"
             [titleText]="card.titleText" [titleClass]="card.titleClass" [subTitleText]="card.subTitleText"
             [subTitleClass]="card.subTitleClass" [dataText]="card.dataText" [dataClass]="card.dataClass">
         </basic-data-card>

@@ -9,6 +9,10 @@ import { MessageService } from 'primeng/api';
 import { SpinnerOverlayComponent } from './shared-components/spinner-overlay/spinner-overlay.component';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressBarOverlayComponent } from './shared-components/progress-bar-overlay/progress-bar-overlay.component';
+import { UserService } from './shared-services/user.service';
+import { LocalStorageService } from './shared-services/local-storage.service';
+import { COLLECTION } from './constants/firebase-collection.constants';
+
 @Component({
     selector: 'app-root',
     imports: [
@@ -35,7 +39,9 @@ export class AppComponent {
 
     constructor(
         private router: Router, 
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+        private userService: UserService,
+        private localStorageService: LocalStorageService
     ) {
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd),
@@ -58,5 +64,8 @@ export class AppComponent {
                 return child?.snapshot.data['sideBarMenu'] !== false;
             })
         ).subscribe(show => (this.showTopToolbar.set(show)));
+
+        this.userService.setCurrentUser(this.localStorageService.get(COLLECTION.USERACCOUNTS.COLLECTIONNAME));
+        
     }
 }

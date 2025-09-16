@@ -19,7 +19,7 @@ export class UserService {
     }
 
     public getCurrentUser(): UserAccount | null {
-        return this.currentUser();
+        return this.currentUser() || null;
     }
 
 

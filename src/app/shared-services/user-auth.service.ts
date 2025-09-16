@@ -40,6 +40,7 @@ export class UserAuthService {
     }
 
     public logoutUser(): Observable<boolean> {
+        console.log('user',this.userService.getCurrentUser());
         return this.firebaseService.updateData$(COLLECTION.USERACCOUNTS.COLLECTIONNAME, this.userService.getCurrentUser()!.id!, { isLoggedIn: false, }).pipe(
             map(() => {
                 this.localStorageService.clear();

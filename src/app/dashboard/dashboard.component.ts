@@ -1,25 +1,14 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { BasicDataCardComponent } from '../shared-components/basic-data-card/basic-data-card.component';
+import { BasicDataCardComponent, BasicDataCard } from '../shared-components/basic-data-card/basic-data-card.component';
 import { CommonModule } from '@angular/common';
-
-export type BasicDataCard = {
-    icon: string;
-    iconClass: string;
-    titleText: string;
-    titleClass: string;
-    subTitleText: string;
-    subTitleClass: string;
-    dataText: string;
-    dataClass: string;
-}
 
 @Component({
     selector: 'app-dashboard',
     imports: [
         ButtonModule,
         BasicDataCardComponent,
-        CommonModule
+        CommonModule,
     ],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.css',
@@ -28,14 +17,14 @@ export type BasicDataCard = {
 export class DashboardComponent implements OnInit{
 
     protected basicDataCards = signal<BasicDataCard[]>([]);
-
     constructor(){
 
     }
 
     ngOnInit() {
         this.basicDataCards.set([
-            {
+            {   
+                cardClass: '!w-[300px] !h-[130px]',
                 icon: 'fa-solid fa-users',
                 iconClass: 'background-color: #DBEAFE; color: #2563EB;',
                 titleText: 'Total Patients',
@@ -46,6 +35,7 @@ export class DashboardComponent implements OnInit{
                 dataClass: 'text-m text-gray-500',
             },
             {
+                cardClass: '!w-[300px] !h-[130px]',
                 icon: 'fa-solid fa-calendar-days',
                 iconClass: 'background-color: #DCFCE7; color: #16A34A;',
                 titleText: 'Today\'s Appointments',
