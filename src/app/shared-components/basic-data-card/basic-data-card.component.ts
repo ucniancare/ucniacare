@@ -26,18 +26,16 @@ export type BasicDataCard = {
 })
 export class BasicDataCardComponent {
 
-    @Input() cardClass?: string = '';
-
-    @Input() icon?: string = '';
-    @Input() iconClass?: string = '';
-
-    @Input() titleText?: string = '';
-    @Input() titleClass?: string = '';
-
-    @Input() subTitleText?: string = '';
-    @Input() subTitleClass?: string = '';
-
-    @Input() dataText?: string = '';
-    @Input() dataClass?: string = '';
+    @Input() basicDataCard: BasicDataCard = {
+        cardClass: '',
+        icon: '',
+        iconClass: '',
+        titleText: '',
+        titleClass: '',
+        subTitleText: '',
+        subTitleClass: '',
+        dataText: '',
+        dataClass: '',
+    };
 
 }

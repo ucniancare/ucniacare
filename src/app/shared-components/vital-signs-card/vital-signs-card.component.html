@@ -1,0 +1,17 @@
+<p-card [styleClass]="basicDataCard.cardClass">
+    <div>
+        <div class="flex flex-col items-center justify-center text-center">
+            <div class="rounded-md flex items-center justify-center" [style]="basicDataCard.iconClass">
+                <i class="{{basicDataCard.icon}}"></i>
+            </div>
+            <div class="mt-1">
+                <h1 class="{{basicDataCard.titleClass}}">{{basicDataCard.titleText}}</h1>
+            </div>
+            <div>
+                <h1 class="{{basicDataCard.subTitleClass}}">{{basicDataCard.subTitleText}}</h1>
+                <p class="{{basicDataCard.dataClass}}">{{basicDataCard.dataText}}</p>
+            </div>
+            
+        </div>
+    </div>
+</p-card>

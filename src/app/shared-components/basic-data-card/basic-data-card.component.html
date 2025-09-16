@@ -1,19 +1,19 @@
-<p-card [styleClass]="cardClass">
+<p-card [styleClass]="basicDataCard.cardClass">
     <div class="ml-2">
         <div class="flex items-center gap-6">
-            <div class="w-[48px] h-[48px] rounded-md flex items-center justify-center" [style]="iconClass">
-                <i class="{{icon}}"></i>
+            <div class="w-[48px] h-[48px] rounded-md flex items-center justify-center" [style]="basicDataCard.iconClass">
+                <i class="{{basicDataCard.icon}}"></i>
             </div>
     
             <div>
-                 <h1 class="{{titleClass}}">{{titleText}}</h1>
-                <h1 class="{{subTitleClass}}">{{subTitleText}}</h1>
+                 <h1 class="{{basicDataCard.titleClass}}">{{basicDataCard.titleText}}</h1>
+                <h1 class="{{basicDataCard.subTitleClass}}">{{basicDataCard.subTitleText}}</h1>
                
             </div>
             
         </div>
         <div class="mt-2">
-            <p class="{{dataClass}}">{{dataText}}</p>
+            <p class="{{basicDataCard.dataClass}}">{{basicDataCard.dataText}}</p>
         </div>
     </div>
 </p-card>
