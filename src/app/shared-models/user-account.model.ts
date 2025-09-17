@@ -15,25 +15,25 @@ export class UserAccountModel {
         };
     }
 
-    static toJsonPartial(user: Partial<UserAccount>): any {
+    static toJsonPartial(userAccount: Partial<UserAccount>): any {
         return {
-            ...(user.id !== undefined && { id: user.id }),
-            ...(user.ucIdNumber !== undefined && { ucIdNumber: user.ucIdNumber }),
-            ...(user.password !== undefined && { password: user.password }),
-            ...(user.isLoggedIn !== undefined && { isLoggedIn: user.isLoggedIn }),
-            ...(user.lastLogin !== undefined && { lastLogin: user.lastLogin }),
-            ...(user.metaData !== undefined && { metaData: user.metaData })
+            ...(userAccount.id !== undefined && { id: userAccount.id }),
+            ...(userAccount.ucIdNumber !== undefined && { ucIdNumber: userAccount.ucIdNumber }),
+            ...(userAccount.password !== undefined && { password: userAccount.password }),
+            ...(userAccount.isLoggedIn !== undefined && { isLoggedIn: userAccount.isLoggedIn }),
+            ...(userAccount.lastLogin !== undefined && { lastLogin: userAccount.lastLogin }),
+            ...(userAccount.metaData !== undefined && { metaData: userAccount.metaData })
         }
     }
 
-    static toJson(user: UserAccount): any {
+    static toJson(userAccount: UserAccount): any {
         return {
-            //id: user.id,
-            ucIdNumber: user.ucIdNumber,
-            password: user.password,
-            isLoggedIn: user.isLoggedIn,
-            lastLogin: user.lastLogin,
-            metaData: user.metaData
+            //id: userAccount.id,
+            ucIdNumber: userAccount.ucIdNumber,
+            password: userAccount.password,
+            isLoggedIn: userAccount.isLoggedIn,
+            lastLogin: userAccount.lastLogin,
+            metaData: userAccount.metaData
         };
     }
 }
