@@ -3,6 +3,22 @@ import { ButtonModule } from 'primeng/button';
 import { BasicDataCardComponent, BasicDataCard } from '../shared-components/basic-data-card/basic-data-card.component';
 import { CommonModule } from '@angular/common';
 import { VitalSignsCardComponent } from '../shared-components/vital-signs-card/vital-signs-card.component';
+import { FileSelectEvent, FileUploadEvent, FileUploadModule } from 'primeng/fileupload';
+import { MessageService } from 'primeng/api';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { User } from '../shared-interfaces/user';
+import { COLLECTION } from '../constants/firebase-collection.constants';
+import { UserModel } from '../shared-models/user.model';
+import { UserService } from '../shared-services/user.service';
+import { FirebaseService } from '../shared-services/firebase.service';
+import { catchError, of, tap } from 'rxjs';
+import { FileUploadService } from '../shared-services/file-upload.service';
+import { GoogleDriveUtil } from '../shared-utils/google-drive-util';
+interface UploadEvent {
+    originalEvent: Event;
+    files: File[];
+}
+
 
 @Component({
     selector: 'app-dashboard',
@@ -11,6 +27,8 @@ import { VitalSignsCardComponent } from '../shared-components/vital-signs-card/v
         BasicDataCardComponent,
         VitalSignsCardComponent,
         CommonModule,
+        FileUploadModule,
+        HttpClientModule
     ],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.css',
@@ -20,8 +38,18 @@ export class DashboardComponent implements OnInit{
 
     protected basicDataCards = signal<BasicDataCard[]>([]);
     protected vitalSignsCards = signal<BasicDataCard[]>([]);
-    constructor(){
 
+    uploadedImages: string[] = [];
+    accessToken: string | null = null;
+    imageUrl: string = '';
+
+    constructor(
+        private messageService: MessageService,
+        private userService: UserService,
+        private firebaseService: FirebaseService,
+        private fileUploadService: FileUploadService,
+        private httpClient: HttpClient
+    ){
     }
 
     ngOnInit() {
@@ -98,6 +126,57 @@ export class DashboardComponent implements OnInit{
                 dataClass: '',
             },
         ]);
+
+        this.imageUrl = GoogleDriveUtil.getImageUrl('1aMJ3LdphNpFie14ggqOFDzz9PqSojEKL');
         
     }
+
+    onBasicUploadAuto(event: FileSelectEvent) {
+        for (const file of event.files) {
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+                this.uploadedImages.push(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        const file = event.files[0];
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        this.fileUploadService.uploadFile(file, 'profilePicture').subscribe();
+    }
+
+    public addUser() {
+        const user: User = {
+            userAccountId: this.userService.currentUser()?.id,
+            firstName: 'Super',
+            lastName: 'Admin',
+            middleName: '',
+            extName: '',
+            sex: 'Male',
+            email: 'super@admin.com',
+            phoneNumber: '09997527570',
+            dateOfBirth: new Date(),
+            maritalStatus: 'Single',
+            userRoles: ['admin'],
+            profilePicture: '',
+            metaData: {
+                createdAt: new Date(),
+                createdBy: '123123123',
+                updatedAt: new Date(),
+                updatedBy: '123123123'
+            }
+        }
+    
+        this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user, UserModel.toJson, UserModel.fromJson).pipe(
+            tap(user => console.log('user added: ', user)),
+            catchError(err => {
+                return of(null);
+            })
+        ).subscribe();
+    }
+
+    
 }

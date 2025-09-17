@@ -1,0 +1,10 @@
+<div *ngIf="isVisible()" class="overlay">
+    <p-card>
+        <div class="content">
+            <p-progress-spinner strokeWidth="2" fill="transparent" animationDuration=".5s"
+                [style]="{ width: '120px', height: '120px' }" />
+            <p class="spinner-text">{{ message() }}</p>
+        </div>
+    </p-card>
+
+</div>

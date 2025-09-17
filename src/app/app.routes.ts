@@ -5,6 +5,7 @@ import { LoginPageComponent } from './login-page/login-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthGuardService } from './guards/auth-guard.service';
 import { LoginGuardService } from './guards/login-guard.service';
+import { DevToolsComponent } from './dev-tools/dev-tools.component';
 
 export const routes: Routes = [
     
@@ -54,6 +55,14 @@ export const routes: Routes = [
     {
         path: 'ucniacare',
         component: LandingPageComponent,
+        data: { 
+            sideBarMenu: false, 
+            topToolbar: false 
+        },
+    },
+    {
+        path: 'dev-tools',
+        component: DevToolsComponent,
         data: { 
             sideBarMenu: false, 
             topToolbar: false 

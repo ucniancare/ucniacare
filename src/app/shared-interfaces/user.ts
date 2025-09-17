@@ -10,8 +10,9 @@ export class User {
     sex?: string;
     email?: string;
     phoneNumber?: string;
-    dateOfBirth?: string;
+    dateOfBirth?: Date;
     maritalStatus?: string;
     userRoles?: string[];
+    profilePicture?: string;
     metaData?: MetaData;
 }

@@ -6,7 +6,7 @@ import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import FirebaseService from '../shared-services/firebase.service';
+import { FirebaseService } from '../shared-services/firebase.service';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { UserAccount } from '../shared-interfaces/user-account';
@@ -20,6 +20,9 @@ import { SpinnerOverlayService } from '../shared-services/spinner-overlay.servic
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressBarOverlayService } from '../shared-services/progress-bar-overlay.service';
 import { DataSecurityService } from '../shared-services/data-security.service';
+import { User } from '../shared-interfaces/user';
+import { UserService } from '../shared-services/user.service';
+import { UserModel } from '../shared-models/user.model';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -54,7 +57,8 @@ export class LoginPageComponent implements OnInit{
         private localStorageService: LocalStorageService,
         private spinnerOverlayService: SpinnerOverlayService,
         private progressBarOverlayService: ProgressBarOverlayService,
-        private dataSecurityService: DataSecurityService
+        private dataSecurityService: DataSecurityService,
+        private userService: UserService
     ) {
     }
 
@@ -82,27 +86,27 @@ export class LoginPageComponent implements OnInit{
     }
 
     public addUserForTesting(): void {
-        const password = '123';
-        const userAccount: UserAccount = {
-            ucIdNumber: 'admin',
-            password: this.dataSecurityService.encrypData(password),
-            isLoggedIn: false,
-            lastLogin: new Date(),
-            metaData: {
-                createdAt: new Date(),
-                createdBy: '123123123',
-                updatedAt: new Date(),
-                updatedBy: '123123123'
-            }
-        }
+        // const password = '123';
+        // const userAccount: UserAccount = {
+        //     ucIdNumber: 'admin',
+        //     password: this.dataSecurityService.encrypData(password),
+        //     isLoggedIn: false,
+        //     lastLogin: new Date(),
+        //     metaData: {
+        //         createdAt: new Date(),
+        //         createdBy: '123123123',
+        //         updatedAt: new Date(),
+        //         updatedBy: '123123123'
+        //     }
+        // }
 
-        this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount, UserAccountModel.toJson, UserAccountModel.fromJson).pipe(
-            tap(user => console.log('user added: ', user)),
-            catchError(err => {
-                return of(null);
-            })
-        ).subscribe();
-    
+        // this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount, UserAccountModel.toJson, UserAccountModel.fromJson).pipe(
+        //     tap(user => console.log('user added: ', user)),
+        //     catchError(err => {
+        //         return of(null);
+        //     })
+        // ).subscribe();
+
     }
 
     protected disableLoginButton(): boolean {

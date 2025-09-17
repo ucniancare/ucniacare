@@ -7,18 +7,21 @@ import { MessageService } from 'primeng/api';
 import { UserService } from './user.service';
 import { APPCONSTS } from '../constants/data.constants';
 import { DataSecurityService } from './data-security.service';
+import { ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
+import { Storage } from '@angular/fire/storage';
 
 @Injectable({
     providedIn: 'root'
 })
 
-export default class FirebaseService {
+export class FirebaseService {
 
     constructor(
         private firestore: Firestore,
         private messageService: MessageService,
         private userService: UserService,
-        private dataSecurityService: DataSecurityService
+        private dataSecurityService: DataSecurityService,
+        private storage: Storage
     ) {
 
     }
@@ -128,6 +131,42 @@ export default class FirebaseService {
         const docRef = doc(this.firestore, `${collectionName}/${id}`);
 
         return from(deleteDoc(docRef));
+    }
+
+    /**
+     * Deletes all documents from a Firestore collection
+     * @param collectionName - The name of the Firestore collection
+     * @returns Observable that completes when the collection is deleted
+     */
+    public deleteCollection$(collectionName: string): Observable<void> {
+        const colRef = collection(this.firestore, collectionName);
+    
+        return from(getDocs(colRef)).pipe(
+            switchMap(snapshot => {
+                if (snapshot.empty) {
+                    return of(void 0);
+                }
+    
+                const deleteObservables = snapshot.docs.map(d => from(deleteDoc(doc(this.firestore, `${collectionName}/${d.id}`))));
+                return from(Promise.all(deleteObservables)).pipe(map(() => void 0));
+            })
+        );
+    }
+
+    public uploadUserProfilePicture$(userId: string, file: File) {
+        const path = `profilePictures/${userId}_${Date.now()}_${file.name}`;
+        const storageRef = ref(this.storage, path);
+
+        return from(uploadBytes(storageRef, file)).pipe(
+            switchMap(snap => from(getDownloadURL(snap.ref))),
+            switchMap(url => {
+                const userRef = doc(this.firestore, `users/${userId}`);
+                return from(updateDoc(userRef, { profilePicture: url })).pipe(
+                    // return the URL after updating Firestore
+                    switchMap(() => from([url]))
+                );
+            })
+        );
     }
 
     public authenticateUser$(ucIdNumber: string, password: string): Observable<UserAccount | null> {

@@ -12,6 +12,8 @@ import { environment } from './keys/environment';
 import { provideAuth } from '@angular/fire/auth';
 import { getAuth } from '@angular/fire/auth';
 import { MessageService } from 'primeng/api';
+import { getStorage, provideStorage } from '@angular/fire/storage';
+import { provideHttpClient } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -20,9 +22,11 @@ export const appConfig: ApplicationConfig = {
         provideAuth(() => getAuth()),
         provideFirestore(() => getFirestore()),
         provideDatabase(() => getDatabase()),
+        provideStorage(() => getStorage()),
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(routes),
         provideAnimationsAsync(),
+        provideHttpClient(),
         providePrimeNG({
             theme: {
                 preset: Aura,

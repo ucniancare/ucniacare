@@ -10,12 +10,12 @@ export class SpinnerOverlayService {
     isLoading = this._isLoading.asReadonly();
     message = this._message.asReadonly();
 
-    show(message?: string): void {
+    public show(message?: string): void {
         this._message.set(message || 'Loading...');
         this._isLoading.set(true);
     }
 
-    hide(): void {
+    public hide(): void {
         this._message.set('');
         this._isLoading.set(false);
     }

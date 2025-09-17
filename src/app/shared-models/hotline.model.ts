@@ -1,5 +1,5 @@
 import { Timestamp } from "@angular/fire/firestore";
-import { Hotline } from "../shared-interfaces/hotlines";
+import { Hotline } from "../shared-interfaces/hotline";
 
 
 export class HotlineModel {

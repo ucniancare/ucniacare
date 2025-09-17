@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import FirebaseService from './firebase.service';
+import { FirebaseService } from './firebase.service';
 import { catchError, finalize, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { UserAccount } from '../shared-interfaces/user-account';
 import { COLLECTION } from '../constants/firebase-collection.constants';
