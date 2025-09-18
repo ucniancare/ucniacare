@@ -3,6 +3,8 @@ import { CanActivate, Router } from '@angular/router';
 import { LocalStorageService } from '../shared-services/local-storage.service';
 import { UserAccount } from '../shared-interfaces/user-account';
 import { COLLECTION } from '../constants/firebase-collection.constants';
+import { LOCALSTORAGECONSTS } from '../constants/local-storage.constants';
+import { User } from '../shared-interfaces/user';
 
 @Injectable({
     providedIn: 'root'
@@ -15,9 +17,10 @@ export class LoginGuardService implements CanActivate {
     ) { }
 
     canActivate(): boolean {
-        const user = this.localStorageService.get<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME);
+        const userAccount: UserAccount | null = this.localStorageService.get(LOCALSTORAGECONSTS.USERACCOUNT);
+        const user: User | null = this.localStorageService.get(LOCALSTORAGECONSTS.USER);
 
-        if (user) {
+        if (userAccount && user) {
             this.router.navigate(['/dashboard']);
             return false;
         }

@@ -12,8 +12,9 @@
     <ng-template #end>
         <div class="flex items-center gap-2 mr-4">
             <div class="card flex justify-center">
-                <p-menu #menu [model]="items" [popup]="true" appendTo="body"/>
-                <p-button (click)="menu.toggle($event)" icon="fa-solid fa-user" size="large" class="ml-2" severity="secondary" />
+                <p-menu #menu [model]="items" [popup]="true" appendTo="body"/> 
+                <img (click)="menu.toggle($event)" [src]="user()?.profilePicture | imageSrc" alt="profile picture" class="w-12 h-12 object-cover cursor-pointer rounded-full" />
+                <!-- <p-button  size="large" class="ml-2" severity="secondary" /> -->
             </div>
         </div>
     </ng-template>

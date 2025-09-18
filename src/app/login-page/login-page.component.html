@@ -7,26 +7,47 @@
             <div class="flex justify-center">
                 <img src="./ucniacare/assets/logos/ucniacare_logo_blue_transparent.png" alt="UCNIACARE" class="w-48 h-48">
             </div>
-            <h1 class="text-2xl sm:text-1xl md:text-1xl text-balance text-center mb-6" (click)="addUserForTesting()">Login to your account</h1>
+            <h1 class="text-2xl sm:text-1xl md:text-1xl text-balance text-center mb-6" (click)="addUserForTesting()">{{ header() }}</h1>
             <div *ngIf="loginErrorMessage()" class="mb-6">
                 <p-message severity="error">{{ loginErrorMessage() }}</p-message>
             </div>
+            <div *ngIf="pageState() === 'login'">
+                <form [formGroup]="loginForm">
+                    <p-floatlabel variant="on">
+                        <input pInputText id="idNumber" formControlName="idNumber" autocomplete="off" class="w-full" />
+                        <label for="idNumber">ID Number</label>
+                    </p-floatlabel>
+                    <p-floatlabel variant="on" class="mt-4">
+                        <input type="password" pInputText id="password" formControlName="password" autocomplete="off" class="w-full" />
+                        <label for="password">Password</label>
+                    </p-floatlabel>
 
-            <p-floatlabel variant="on">
-                <input pInputText id="on_label" [(ngModel)]="idNumber" autocomplete="off" class="w-full" />
-                <label for="on_label">ID Number</label>
-            </p-floatlabel>
-            <p-floatlabel variant="on" class="mt-4">
-                <input type="password" pInputText id="on_label" [(ngModel)]="password" autocomplete="off" class="w-full" />
-                <label for="on_label">Password</label>
-            </p-floatlabel>
-            <div class="mt-1 flex justify-end">
-                <p-button label="Forgot Password?" link />
+                    <div class="mt-1 flex justify-end">
+                        <p-button (click)="setForgotPasswordState()" label="Forgot Password?" link />
+                    </div>
+                    <div class="mt-2">
+                        <p-button type="submit" label="Login" (click)="login()" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" [disabled]="disableLoginButton()" />
+                        </div>  
+                </form>
+            </div>
+
+            <div *ngIf="pageState() === 'forgotPassword'">
+                <form [formGroup]="forgotPasswordForm">
+                    <p class="text-center mb-6 text-gray-600">Enter your email address and we'll send you a code to reset your password.</p>
+                    <p-floatlabel variant="on">
+                        <input type="email" pInputText id="email" formControlName="email" autocomplete="off" class="w-full" />
+                        <label for="email">Email</label>
+                    </p-floatlabel>
+
+                    <div class="mt-4">
+                        <p-button type="submit" label="Send" (click)="forgotPassword()" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" [disabled]="disableForgotPasswordButton()" />
+                        </div> 
+                    <div class="mt-2 flex justify-center">
+                        <p-button (click)="setLoginState()" label="← Back to Login" link />
+                    </div> 
+                </form>
             </div>
             
-            <div class="mt-2">
-                <p-button label="Login" (click)="login()" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" [disabled]="disableLoginButton()" />
-            </div>
         </div>
     </p-card>
 </div>

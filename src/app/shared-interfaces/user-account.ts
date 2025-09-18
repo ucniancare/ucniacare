@@ -1,6 +1,6 @@
 import { MetaData } from "./meta-data";
 
-export interface UserAccount {
+export class UserAccount {
     id?: string;
     ucIdNumber?: string;
     password?: string;

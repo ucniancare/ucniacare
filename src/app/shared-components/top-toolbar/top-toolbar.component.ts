@@ -12,6 +12,9 @@ import { MenuModule } from 'primeng/menu';
 import { UserAuthService } from '../../shared-services/user-auth.service';
 import { ProgressBarOverlayService } from '../../shared-services/progress-bar-overlay.service';
 import { catchError, finalize, of, tap } from 'rxjs';
+import { User } from '../../shared-interfaces/user';
+import { UserService } from '../../shared-services/user.service';
+import { ImageSrcPipe } from '../../shared-pipes/google-drive-image.pipe';
 
 @Component({
     selector: 'top-toolbar',
@@ -24,7 +27,8 @@ import { catchError, finalize, of, tap } from 'rxjs';
         CommonModule, 
         ButtonModule,
         RouterModule,
-        MenuModule
+        MenuModule,
+        ImageSrcPipe
     ],
     templateUrl: './top-toolbar.component.html',
     styleUrl: './top-toolbar.component.css',
@@ -32,19 +36,24 @@ import { catchError, finalize, of, tap } from 'rxjs';
 })
 export class TopToolbarComponent implements OnInit {
 
+    protected user = signal<User | null>(null);
     protected items: MenuItem[] = [];
+    
 
     constructor(
         private userAuthService: UserAuthService,
         private progressBarOverlayService: ProgressBarOverlayService,
-        private router: Router
+        private router: Router,
+        private userService: UserService
     ) {
+        console.log("TopToolbarComponent constructor");
+        this.user.set(this.userService.currentUser());
     }
 
     ngOnInit() {    
         this.items = [
             {
-                label: 'Clifford Alferez',
+                label: this.user()?.firstName + ' ' + this.user()?.lastName,
                 items: [
                     {
                         label: 'Notifications',

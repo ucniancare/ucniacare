@@ -5,7 +5,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FirebaseService } from '../shared-services/firebase.service';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -23,6 +23,7 @@ import { DataSecurityService } from '../shared-services/data-security.service';
 import { User } from '../shared-interfaces/user';
 import { UserService } from '../shared-services/user.service';
 import { UserModel } from '../shared-models/user.model';
+import { OTPTemplateForm } from '../shared-services/email-js.service';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -34,7 +35,8 @@ import { UserModel } from '../shared-models/user.model';
         CommonModule,
         FormsModule,
         MessageModule,
-        ProgressBarModule
+        ProgressBarModule,
+        ReactiveFormsModule
     ],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.css',
@@ -42,12 +44,19 @@ import { UserModel } from '../shared-models/user.model';
 })
 export class LoginPageComponent implements OnInit{
 
-
-    protected idNumber: string = '';
-    protected password: string = '';
-
     protected loginErrorMessage = signal<string>('');
     protected isLoading = signal<boolean>(false);
+    protected pageState = signal<string>('login');
+    protected header = signal<string>('Login to your account');
+
+    protected loginForm = new FormGroup({
+        idNumber: new FormControl('', Validators.required),
+        password: new FormControl('', Validators.required)
+    });
+
+    protected forgotPasswordForm = new FormGroup({
+        email: new FormControl('', [Validators.required, Validators.email])
+    });
 
     constructor(
         private firebaseService: FirebaseService, 
@@ -63,20 +72,39 @@ export class LoginPageComponent implements OnInit{
     }
 
     ngOnInit(): void {
+        this.pageState.set('login');
+        this.header.set('Login to your account');
     }
 
     protected login(): void {
         this.isLoading.set(true);
         this.progressBarOverlayService.show();
-        this.userAuthService.loginUser(this.idNumber, this.password).pipe(
+        this.loginErrorMessage.set(''); // Clear previous errors
+        
+        this.userAuthService.loginUser(this.loginForm.get('idNumber')?.value || '', this.loginForm.get('password')?.value || '').pipe(
             tap(user => {
                 if (user) {
-                    this.messageService.add({ severity: 'success', summary: 'Success!', detail: 'Login successful' });
+                    this.messageService.add({ 
+                        severity: 'success', 
+                        summary: 'Welcome!', 
+                        detail: 'Login successful',
+                        life: 3000
+                    });
                     this.router.navigate(['/dashboard']);
-                }
-                else {
+                } else {
                     this.loginErrorMessage.set('Invalid ID number or password.');
                 }
+            }),
+            catchError(error => {
+                console.error('Login error:', error);
+                this.loginErrorMessage.set('An error occurred during login. Please try again.');
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Login Failed', 
+                    detail: 'An error occurred during login. Please try again.',
+                    life: 5000
+                });
+                return of(null);
             }),
             finalize(() => {
                 this.progressBarOverlayService.hide();
@@ -109,8 +137,78 @@ export class LoginPageComponent implements OnInit{
 
     }
 
+    protected setForgotPasswordState(): void {
+        this.pageState.set('forgotPassword');
+        this.header.set('Forgot Password');
+        this.loginErrorMessage.set(''); // Clear any login errors
+        this.forgotPasswordForm.reset(); // Reset forgot password form
+    }
+
+    protected setLoginState(): void {
+        this.pageState.set('login');
+        this.header.set('Login to your account');
+        this.loginErrorMessage.set(''); // Clear any login errors
+        this.loginForm.reset(); // Reset login form
+    }
+
     protected disableLoginButton(): boolean {
-        return !this.idNumber || !this.password || this.isLoading();
+        return !this.loginForm.get('idNumber')?.value || !this.loginForm.get('password')?.value || this.isLoading();
+    }
+
+    protected disableForgotPasswordButton(): boolean {
+        return this.forgotPasswordForm.invalid || this.isLoading();
+    }
+
+    protected forgotPassword(): void {
+        const code: string = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log('code: ', code);
+        this.isLoading.set(true);
+        this.spinnerOverlayService.show('Sending reset email...');
+
+        const currentTime = new Date();
+        const expirationTime = new Date(currentTime.getTime() + 15 * 60 * 1000);
+        
+        const data: OTPTemplateForm = {
+            email: this.forgotPasswordForm.get('email')?.value || '',
+            otp: code,
+            time: expirationTime.toLocaleTimeString() 
+        }
+
+        this.userAuthService.sendOTP(data).pipe(
+            tap(success => {
+                if (success) {
+                    this.messageService.add({ 
+                        severity: 'success', 
+                        summary: 'Email Sent!', 
+                        detail: 'Please check your email for the reset code. The code will expire in 15 minutes.',
+                        life: 5000
+                    });
+                } 
+        
+                else {
+                    this.messageService.add({ 
+                        severity: 'error', 
+                        summary: 'Failed to Send Email', 
+                        detail: 'Unable to send reset email. Please check your email address and try again.',
+                        life: 5000
+                    });
+                }
+            }),
+            catchError(error => {
+                console.error('Forgot password error:', error);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: 'An unexpected error occurred. Please try again later.',
+                    life: 5000
+                });
+                return of(false);
+            }),
+            finalize(() => {
+                this.spinnerOverlayService.hide();
+                this.isLoading.set(false);
+            })
+        ).subscribe();
     }
 
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { BasicDataCardComponent, BasicDataCard } from '../shared-components/basic-data-card/basic-data-card.component';
 import { CommonModule } from '@angular/common';
@@ -11,14 +11,22 @@ import { COLLECTION } from '../constants/firebase-collection.constants';
 import { UserModel } from '../shared-models/user.model';
 import { UserService } from '../shared-services/user.service';
 import { FirebaseService } from '../shared-services/firebase.service';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, of, switchMap, tap } from 'rxjs';
 import { FileUploadService } from '../shared-services/file-upload.service';
 import { GoogleDriveUtil } from '../shared-utils/google-drive-util';
+import emailjs, { type EmailJSResponseStatus } from '@emailjs/browser';
+import { GOOGLEDRIVEFOLDERCONSTS } from '../constants/google-drive-folders.constants';
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
 }
 
+interface ContactForm {
+    email: string;
+    otp: string;
+    time: string;
+    [key: string]: unknown;
+}
 
 @Component({
     selector: 'app-dashboard',
@@ -34,12 +42,14 @@ interface UploadEvent {
     styleUrl: './dashboard.component.css',
     standalone: true
 })
-export class DashboardComponent implements OnInit{
+export class DashboardComponent implements OnInit, OnDestroy {
 
     protected basicDataCards = signal<BasicDataCard[]>([]);
     protected vitalSignsCards = signal<BasicDataCard[]>([]);
+    private user: User | null = null;
 
     uploadedImages: string[] = [];
+    uploadedFiles: File[] = [];
     accessToken: string | null = null;
     imageUrl: string = '';
 
@@ -50,6 +60,7 @@ export class DashboardComponent implements OnInit{
         private fileUploadService: FileUploadService,
         private httpClient: HttpClient
     ){
+        this.user = this.userService.currentUser();
     }
 
     ngOnInit() {
@@ -132,25 +143,79 @@ export class DashboardComponent implements OnInit{
     }
 
     onBasicUploadAuto(event: FileSelectEvent) {
-        for (const file of event.files) {
-            const reader = new FileReader();
-            reader.onload = (e: any) => {
-                this.uploadedImages.push(e.target.result);
-            };
-            reader.readAsDataURL(file);
-        }
-
         const file = event.files[0];
-
         const formData = new FormData();
         formData.append('file', file);
 
-        this.fileUploadService.uploadFile(file, 'profilePicture').subscribe();
+        // Store the file for later upload
+        this.uploadedFiles.push(file);
+        
+        // Create object URL for display
+        const objectUrl = URL.createObjectURL(file);
+        this.uploadedImages.push(objectUrl);
+
+        //this.fileUploadService.uploadFile(file, 'profilePicture').subscribe();
+    }
+
+    saveImage() {
+        if (this.uploadedFiles.length > 0) {
+            if (!this.user?.id) {
+                console.error('No current user found');
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: 'User not found. Please log in again.' 
+                });
+                return;
+            }
+
+            this.fileUploadService.uploadFile(this.uploadedFiles[0], GOOGLEDRIVEFOLDERCONSTS.PROFILEPICTURE, true).pipe(
+                switchMap(file => {
+                    console.log('File uploaded successfully:', file);
+                    return this.firebaseService.updateData$<User>(
+                        COLLECTION.USERS.COLLECTIONNAME, 
+                        this.user!.id!,
+                        { profilePicture: file.id }, 
+                    );
+                }),
+                tap(user => {
+                    console.log('User updated successfully:', user);
+                    this.messageService.add({ 
+                        severity: 'success', 
+                        summary: 'Success', 
+                        detail: 'Profile picture updated successfully!' 
+                    });
+                    // Clear uploaded files after successful save
+                    this.uploadedFiles = [];
+                    this.uploadedImages.forEach(url => {
+                        if (url.startsWith('blob:')) {
+                            URL.revokeObjectURL(url);
+                        }
+                    });
+                    this.uploadedImages = [];
+                }),
+                catchError(err => {
+                    console.error('Error updating profile picture:', err);
+                    this.messageService.add({ 
+                        severity: 'error', 
+                        summary: 'Error', 
+                        detail: 'Failed to update profile picture. Please try again.' 
+                    });
+                    return of(null);
+                })
+            ).subscribe();
+        } else {
+            this.messageService.add({ 
+                severity: 'warn', 
+                summary: 'Warning', 
+                detail: 'Please select an image first.' 
+            });
+        }
     }
 
     public addUser() {
         const user: User = {
-            userAccountId: this.userService.currentUser()?.id,
+            userAccountId: this.userService.currentUserAccount()?.id,
             firstName: 'Super',
             lastName: 'Admin',
             middleName: '',
@@ -178,5 +243,28 @@ export class DashboardComponent implements OnInit{
         ).subscribe();
     }
 
-    
+    send() {
+        console.log('exec');
+        const form: ContactForm = {
+            email: 'belsmarie28@gmail.com',
+            otp: '901242',
+            time: '09:45pm',
+        }
+        emailjs.send('service_fuo2bdo', 'template_jmyzhjo', form, {
+            publicKey: 'Gm2kj3jWLJStfSFNQ'
+        }).then(()=> {
+            console.log('Email sent successfully');
+        }).catch((error) => {
+            console.log(error);
+        })
+    }
+
+    ngOnDestroy() {
+        this.uploadedImages.forEach(url => {
+            if (url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+            }
+        });
+    }
+
 }

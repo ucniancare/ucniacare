@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { UserAccount } from '../shared-interfaces/user-account';
+import { User } from '../shared-interfaces/user';
 
 @Injectable({
     providedIn: 'root'
@@ -7,19 +8,33 @@ import { UserAccount } from '../shared-interfaces/user-account';
 
 export class UserService {
 
-    public currentUser = signal<UserAccount | null>(null);
-
+    public currentUserAccount = signal<UserAccount | null>(null);
+    public currentUser = signal<User | null>(null);
+    
     constructor(
     ) {
 
     }
 
-    public setCurrentUser(user: UserAccount | null): void {
+    public setCurrentUserAccount(user: UserAccount | null): void {
+        this.currentUserAccount.set(user);
+    }
+
+    public getCurrentUserAccount(): UserAccount | null {
+        return this.currentUserAccount() || null;
+    }
+
+    public setCurrentUser(user: User | null): void {
         this.currentUser.set(user);
     }
 
-    public getCurrentUser(): UserAccount | null {
+    public getCurrentUser(): User | null {
         return this.currentUser() || null;
+    }
+
+    public clearUserServiceData(): void {
+        this.currentUserAccount.set(null);
+        this.currentUser.set(null);
     }
 
 

@@ -24,11 +24,11 @@ export class FileUploadService {
         private firebaseService: FirebaseService,
         private spinnerOverlayService: SpinnerOverlayService
     ) {
-        this.currentUser = this.userService.currentUser();
+        this.currentUser = this.userService.currentUserAccount();
     }
 
 
-    public uploadFile(file: File, folder?: string): Observable<any> {
+    public uploadFile(file: File, folder?: string, clearExistingFiles: boolean = false): Observable<any> {
 
         this.spinnerOverlayService.show('Uploading file...');
 
@@ -45,6 +45,15 @@ export class FileUploadService {
                         }
                     }),
                     switchMap(targetFolderId => {
+
+                        if (clearExistingFiles) {
+                            return this.clearFolder(accessToken, targetFolderId).pipe(
+                                switchMap(() => this.uploadToFolder(accessToken, file, targetFolderId))
+                            );
+                        } else {
+                            return this.uploadToFolder(accessToken, file, targetFolderId);
+                        }
+
                         const metadata = {
                             name: file.name,
                             mimeType: file.type,
@@ -86,6 +95,66 @@ export class FileUploadService {
             })
         );
     }
+
+    private uploadToFolder(accessToken: string, file: File, targetFolderId: string): Observable<any> {
+        const metadata = {
+            name: file.name,
+            mimeType: file.type,
+            parents: [targetFolderId]
+        };
+    
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
+    
+        return this.http.post<any>(
+            'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+            form,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+        ).pipe(
+            switchMap(fileRes =>
+                this.http.post(
+                    `https://www.googleapis.com/drive/v3/files/${fileRes.id}/permissions`,
+                    { role: 'reader', type: 'anyone' },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                ).pipe(
+                    map(() => {
+                        this.spinnerOverlayService.hide();
+                        return fileRes;
+                    })
+                )
+            )
+        );
+    }
+
+    private clearFolder(accessToken: string, folderId: string): Observable<void> {
+        return this.http.get<any>(
+            `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+        ).pipe(
+            switchMap(res => {
+                if (!res.files || res.files.length === 0) {
+                    return from(Promise.resolve()); // nothing to delete
+                }
+    
+                // delete all files in parallel
+                const deleteRequests = res.files.map((file: any) =>
+                    this.http.delete<void>(
+                        `https://www.googleapis.com/drive/v3/files/${file.id}`,
+                        { headers: { Authorization: `Bearer ${accessToken}` } }
+                    )
+                );
+    
+                return from(Promise.all(deleteRequests)).pipe(map(() => {}));
+            })
+        );
+    }    
+    
 
     private getAccessToken(): Observable<string> {
         return this.firebaseService.getAllData$<GoogleToken>(COLLECTION.GOOGLE_TOKEN.COLLECTIONNAME).pipe(

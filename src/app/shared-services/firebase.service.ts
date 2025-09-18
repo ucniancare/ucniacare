@@ -83,7 +83,7 @@ export class FirebaseService {
         const updatedData = {
             ...(toJson ? toJson(data) : data),
             "metaData.updatedAt": serverTimestamp(),
-            "metaData.updatedBy": this.userService.getCurrentUser()?.id || APPCONSTS.SYSTEM,
+            "metaData.updatedBy": this.userService.getCurrentUserAccount()?.id || APPCONSTS.SYSTEM,
         };
 
         return from(updateDoc(docRef, updatedData)).pipe(
@@ -122,6 +122,34 @@ export class FirebaseService {
     }
 
     /**
+     * Retrieves documents from a Firestore collection by a field (e.g., userAccountId)
+     * @param collectionName - The name of the Firestore collection
+     * @param field - The field name to filter by
+     * @param value - The value to match in the field
+     * @param fromJson - Optional function to transform data after retrieving from Firestore
+     * @returns Observable of an array of document data with id field
+     */
+    public getDataByField$<T extends object>(collectionName: string, field: string, value: any, fromJson?: (json: any, id?: string) => T): Observable<(T & { id: string })[]> {
+        const q = query(
+            collection(this.firestore, collectionName),
+            where(field, '==', value)
+        );
+
+        return from(getDocs(q)).pipe(
+            map(snapshot => {
+                if (snapshot.empty) {
+                    throw new Error(`No documents found where ${field} == ${value}`);
+                }
+                return snapshot.docs.map(docSnap => {
+                    const raw = { id: docSnap.id, ...docSnap.data() } as any;
+                    return fromJson ? fromJson(raw, docSnap.id) : raw;
+                }) as (T & { id: string })[];
+            })
+        );
+    }
+
+
+    /**
      * Deletes a specific document from a Firestore collection by ID
      * @param collectionName - The name of the Firestore collection
      * @param id - The ID of the document to delete
@@ -140,13 +168,13 @@ export class FirebaseService {
      */
     public deleteCollection$(collectionName: string): Observable<void> {
         const colRef = collection(this.firestore, collectionName);
-    
+
         return from(getDocs(colRef)).pipe(
             switchMap(snapshot => {
                 if (snapshot.empty) {
                     return of(void 0);
                 }
-    
+
                 const deleteObservables = snapshot.docs.map(d => from(deleteDoc(doc(this.firestore, `${collectionName}/${d.id}`))));
                 return from(Promise.all(deleteObservables)).pipe(map(() => void 0));
             })

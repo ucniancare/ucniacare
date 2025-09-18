@@ -12,6 +12,7 @@ import { ProgressBarOverlayComponent } from './shared-components/progress-bar-ov
 import { UserService } from './shared-services/user.service';
 import { LocalStorageService } from './shared-services/local-storage.service';
 import { COLLECTION } from './constants/firebase-collection.constants';
+import { LOCALSTORAGECONSTS } from './constants/local-storage.constants';
 
 @Component({
     selector: 'app-root',
@@ -65,7 +66,8 @@ export class AppComponent {
             })
         ).subscribe(show => (this.showTopToolbar.set(show)));
 
-        this.userService.setCurrentUser(this.localStorageService.get(COLLECTION.USERACCOUNTS.COLLECTIONNAME));
+        this.userService.setCurrentUserAccount(this.localStorageService.get(LOCALSTORAGECONSTS.USERACCOUNT));
+        this.userService.setCurrentUser(this.localStorageService.get(LOCALSTORAGECONSTS.USER));
         
     }
 }

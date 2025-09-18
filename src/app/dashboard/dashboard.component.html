@@ -11,14 +11,18 @@
         <vital-signs-card *ngFor="let card of vitalSignsCards()" [basicDataCard]="card"></vital-signs-card>
     </div>
 
-    <button (click)="addUser()">Add User</button>
-    <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" [customUpload]="true" (onSelect)="onBasicUploadAuto($event)" [auto]="false" chooseLabel="Browse" [disabled]="uploadedImages.length === 1" />
+    
 
+    <button (click)="addUser()">Add User</button>
+    <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" [customUpload]="true" (onSelect)="onBasicUploadAuto($event)" [auto]="false" chooseLabel="Browse" [disabled]="uploadedFiles.length === 1" />
+    <p-button (click)="saveImage()">Save Image</p-button>
     <div class="flex flex-wrap gap-4 mt-4">
         <div *ngFor="let img of uploadedImages">
           <img [src]="img" alt="preview" class="w-32 h-32 object-cover rounded shadow" />
         </div>
       </div>
+
+      <p-button (click)="send()">Send Email</p-button>
 
     
 </div>

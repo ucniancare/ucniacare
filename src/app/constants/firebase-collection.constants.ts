@@ -4,6 +4,8 @@ export const COLLECTION = {
         FIELDS: {
             UCIDNUMBER: 'ucIdNumber',
             PASSWORD: 'password',
+            ISLOGGEDIN: 'isLoggedIn',
+            LASTLOGIN: 'lastLogin',
         },
     },
     USERS: {
