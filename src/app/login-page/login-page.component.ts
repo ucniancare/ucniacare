@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { UserAccount } from '../shared-interfaces/user-account';
 import { UserAccountModel } from '../shared-models/user-account.model';
-import { catchError, finalize, of, tap } from 'rxjs';
+import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 import { COLLECTION } from '../constants/firebase-collection.constants';
 import { UserAuthService } from '../shared-services/user-auth.service';
 import { MessageModule } from 'primeng/message';
@@ -23,7 +23,9 @@ import { DataSecurityService } from '../shared-services/data-security.service';
 import { User } from '../shared-interfaces/user';
 import { UserService } from '../shared-services/user.service';
 import { UserModel } from '../shared-models/user.model';
-import { OTPTemplateForm } from '../shared-services/email-js.service';
+import { OTPTemplateForm } from '../shared-interfaces/otp';
+import { OTPUtil } from '../shared-utils/otp-util';
+import { InputOtpModule } from 'primeng/inputotp';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -36,7 +38,8 @@ import { OTPTemplateForm } from '../shared-services/email-js.service';
         FormsModule,
         MessageModule,
         ProgressBarModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        InputOtpModule
     ],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.css',
@@ -48,6 +51,8 @@ export class LoginPageComponent implements OnInit{
     protected isLoading = signal<boolean>(false);
     protected pageState = signal<string>('login');
     protected header = signal<string>('Login to your account');
+    protected isOTPSent = signal<boolean>(false);
+    protected otp = signal<string>('');
 
     protected loginForm = new FormGroup({
         idNumber: new FormControl('', Validators.required),
@@ -160,20 +165,11 @@ export class LoginPageComponent implements OnInit{
     }
 
     protected forgotPassword(): void {
-        const code: string = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('code: ', code);
+
         this.isLoading.set(true);
-        this.spinnerOverlayService.show('Sending reset email...');
+        this.spinnerOverlayService.show('Sending OTP...');
 
-        const currentTime = new Date();
-        const expirationTime = new Date(currentTime.getTime() + 15 * 60 * 1000);
-        
-        const data: OTPTemplateForm = {
-            email: this.forgotPasswordForm.get('email')?.value || '',
-            otp: code,
-            time: expirationTime.toLocaleTimeString() 
-        }
-
+        const data: OTPTemplateForm = OTPUtil.generateOTP(this.forgotPasswordForm.get('email')?.value || '');
         this.userAuthService.sendOTP(data).pipe(
             tap(success => {
                 if (success) {
@@ -183,16 +179,21 @@ export class LoginPageComponent implements OnInit{
                         detail: 'Please check your email for the reset code. The code will expire in 15 minutes.',
                         life: 5000
                     });
+                    
                 } 
+
+                this.isOTPSent.set(true);
+
+
         
-                else {
-                    this.messageService.add({ 
-                        severity: 'error', 
-                        summary: 'Failed to Send Email', 
-                        detail: 'Unable to send reset email. Please check your email address and try again.',
-                        life: 5000
-                    });
-                }
+                // else {
+                //     this.messageService.add({ 
+                //         severity: 'error', 
+                //         summary: 'Failed to Send Email', 
+                //         detail: 'An email has already been sent to this address. You can request a new OTP in 15 minutes.',
+                //         life: 5000
+                //     });
+                // }
             }),
             catchError(error => {
                 console.error('Forgot password error:', error);
@@ -200,6 +201,95 @@ export class LoginPageComponent implements OnInit{
                     severity: 'error', 
                     summary: 'Error', 
                     detail: 'An unexpected error occurred. Please try again later.',
+                    life: 5000
+                });
+                return of(false);
+            }),
+            finalize(() => {
+                this.spinnerOverlayService.hide();
+                this.isLoading.set(false);
+            })
+        ).subscribe();
+    }
+
+    private isOTPExpired: boolean = false;
+    protected verifyOTP(): void {
+        this.isLoading.set(true);
+        this.spinnerOverlayService.show('Verifying OTP...');
+        
+        this.firebaseService.getDataByField$<OTPTemplateForm>(COLLECTION.OTPS.COLLECTIONNAME, COLLECTION.OTPS.FIELDS.EMAIL, this.forgotPasswordForm.get('email')?.value || '').pipe(
+            tap(otp => {
+                if (otp.length > 0) {
+                    const otpData: OTPTemplateForm = otp[0];
+                    this.isOTPExpired = !!otpData.validUntil && otpData.validUntil > new Date().toISOString() ;
+                    if (this.isOTPExpired) {
+                        if (otpData.otp === this.otp()) {
+                            console.log("matched!");
+                        }
+                        else {
+                            this.messageService.add({ 
+                                severity: 'error', 
+                                summary: 'Error', 
+                                detail: 'Invalid OTP. Please try again.',
+                                life: 5000
+                            });
+                        }
+                    }
+                    else {
+                        this.messageService.add({ 
+                            severity: 'error', 
+                            summary: 'Error', 
+                            detail: 'OTP has expired. Please request a new OTP.',
+                            life: 5000
+                        });
+                    }
+                }
+            }),
+            catchError(error => {
+                console.error('Verify OTP error:', error);
+                return of(null);
+            }),
+            finalize(() => {
+                this.spinnerOverlayService.hide();
+                this.isLoading.set(false);
+            })
+        ).subscribe();
+    }
+
+    protected resendOTP(): void {
+
+        this.isLoading.set(true);
+        this.spinnerOverlayService.show('Resending OTP...');
+
+        this.otp.set('');
+        const data: OTPTemplateForm = OTPUtil.generateOTP(this.forgotPasswordForm.get('email')?.value || '');
+        this.firebaseService.deleteDataByField$(COLLECTION.OTPS.COLLECTIONNAME, COLLECTION.OTPS.FIELDS.EMAIL, data.email).pipe(
+            switchMap(() => 
+                this.userAuthService.sendOTP(data)
+            ),
+            tap(success => {
+                if (success) {
+                    this.messageService.add({ 
+                        severity: 'success', 
+                        summary: 'Email Sent!', 
+                        detail: 'A new reset code has been sent to your email. The code will expire in 15 minutes.',
+                        life: 5000
+                    });
+                } else {
+                    this.messageService.add({ 
+                        severity: 'error', 
+                        summary: 'Failed to Resend', 
+                        detail: 'Failed to resend the reset code. Please try again.',
+                        life: 5000
+                    });
+                }
+            }),
+            catchError(error => {
+                console.error('Resend OTP error:', error);
+                this.messageService.add({ 
+                    severity: 'error', 
+                    summary: 'Error', 
+                    detail: 'An unexpected error occurred while resending. Please try again later.',
                     life: 5000
                 });
                 return of(false);

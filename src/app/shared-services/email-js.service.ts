@@ -1,20 +1,10 @@
 import { Injectable } from '@angular/core';
 import emailjs, { type EmailJSResponseStatus } from '@emailjs/browser';
-import { Observable, of } from 'rxjs';
-
-export interface OTPTemplateForm {
-    email: string;
-    otp: string;
-    time: string;
-    [key: string]: unknown;
-}
-
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
 })
-
-
 
 export class EmailJsService {
 

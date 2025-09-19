@@ -22,4 +22,12 @@ export const COLLECTION = {
             ACCESS_TOKEN: 'accessToken',
         },
     },
+    OTPS: {
+        COLLECTIONNAME: 'otps',
+        FIELDS: {
+            EMAIL: 'email',
+            OTP: 'otp',
+            TIME: 'time',
+        },
+    },
 }

@@ -32,22 +32,36 @@
             </div>
 
             <div *ngIf="pageState() === 'forgotPassword'">
-                <form [formGroup]="forgotPasswordForm">
-                    <p class="text-center mb-6 text-gray-600">Enter your email address and we'll send you a code to reset your password.</p>
-                    <p-floatlabel variant="on">
-                        <input type="email" pInputText id="email" formControlName="email" autocomplete="off" class="w-full" />
-                        <label for="email">Email</label>
-                    </p-floatlabel>
-
-                    <div class="mt-4">
-                        <p-button type="submit" label="Send" (click)="forgotPassword()" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" [disabled]="disableForgotPasswordButton()" />
+                <div *ngIf="!isOTPSent()">
+                    <form [formGroup]="forgotPasswordForm">
+                        <p class="text-center mb-6 text-gray-600">Enter your email address and we'll send you a code to reset your password.</p>
+                        <p-floatlabel variant="on">
+                            <input type="email" pInputText id="email" formControlName="email" autocomplete="off" class="w-full" />
+                            <label for="email">Email</label>
+                        </p-floatlabel>
+    
+                        <div class="mt-4">
+                            <p-button type="submit" label="Send" (click)="forgotPassword()" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" [disabled]="disableForgotPasswordButton()" />
                         </div> 
-                    <div class="mt-2 flex justify-center">
-                        <p-button (click)="setLoginState()" label="← Back to Login" link />
+                        <div class="mt-2 flex justify-center">
+                            <p-button (click)="setLoginState()" label="Back to Login" link />
+                        </div> 
+                    </form>
+                </div>
+                <div *ngIf="isOTPSent()">
+                    <p class="text-center mb-6 text-gray-600">Please enter the code sent to your email.</p>
+                    <div class="card flex justify-center">
+                        <p-inputotp [ngModel]="otp()" (ngModelChange)="otp.set($event)" [integerOnly]="true" size="large" />
+                    </div>
+                    <div class="mt-6">
+                        <p-button type="submit" label="Verify" (click)="verifyOTP()" severity="info" class="w-full max-w-[17.35rem]" styleClass="w-full mx-auto" [disabled]="otp().length !== 4" />
                     </div> 
-                </form>
+                    <div class="mt-2 flex justify-center">
+                        <p-button (click)="resendOTP()" label="Resend Code" link [disabled]="isLoading()" />
+                    </div> 
+                </div>
+                
             </div>
-            
         </div>
     </p-card>
 </div>

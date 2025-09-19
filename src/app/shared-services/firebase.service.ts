@@ -162,6 +162,28 @@ export class FirebaseService {
     }
 
     /**
+   * Deletes documents from a Firestore collection where a field matches a value
+   * @param collectionName - The name of the Firestore collection
+   * @param field - The field to filter by
+   * @param value - The value that the field should match
+   * @returns Observable that completes when all matching documents are deleted
+   */
+    public deleteDataByField$(collectionName: string, field: string, value: any): Observable<void> {
+        const colRef = collection(this.firestore, collectionName);
+        const q = query(colRef, where(field, "==", value));
+
+        return from(
+            getDocs(q).then(snapshot => {
+                const deletePromises: Promise<void>[] = [];
+                snapshot.forEach(docSnap => {
+                    deletePromises.push(deleteDoc(docSnap.ref));
+                });
+                return Promise.all(deletePromises).then(() => void 0);
+            })
+        );
+    }
+
+    /**
      * Deletes all documents from a Firestore collection
      * @param collectionName - The name of the Firestore collection
      * @returns Observable that completes when the collection is deleted
