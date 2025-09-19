@@ -2,7 +2,7 @@
 import { Component, computed } from '@angular/core';
 import { ProgressBar } from 'primeng/progressbar';
 import { CommonModule } from '@angular/common';
-import { ProgressBarOverlayService } from '../../shared-services/progress-bar-overlay.service';
+import { ProgressBarOverlayService } from '../../shared-services/primeng-services/progress-bar-overlay.service';
 
 @Component({
   selector: 'progress-bar-overlay',

@@ -3,9 +3,11 @@ import { LandingPageComponent } from './landing-page/components/landing-page/lan
 import { AboutUsPageComponent } from './about-us-page/components/about-us-page/about-us-page.component';
 import { LoginPageComponent } from './login-page/login-page.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { AuthGuardService } from './guards/auth-guard.service';
-import { LoginGuardService } from './guards/login-guard.service';
+import { AuthGuard } from './guards/auth.guard';
+import { LoginGuard } from './guards/login.guard';
 import { DevToolsComponent } from './dev-tools/dev-tools.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
+import { ChangePasswordGuard } from './guards/change-password.guard';
 
 export const routes: Routes = [
     
@@ -33,7 +35,7 @@ export const routes: Routes = [
             sideBarMenu: false, 
             topToolbar: false 
         },
-        canActivate: [LoginGuardService]
+        canActivate: [LoginGuard]
     },
     { 
         path: 'dashboard', 
@@ -42,7 +44,7 @@ export const routes: Routes = [
             sideBarMenu: true, 
             topToolbar: true 
         },
-        canActivate: [AuthGuardService]
+        canActivate: [AuthGuard]
     },
     {
         path: 'home',
@@ -67,6 +69,15 @@ export const routes: Routes = [
             sideBarMenu: false, 
             topToolbar: false 
         },
+    },
+    {
+        path: 'change-password',
+        component: ChangePasswordComponent,
+        data: { 
+            sideBarMenu: false, 
+            topToolbar: false 
+        },
+        canActivate: [ChangePasswordGuard]
     },
     { path: '**', redirectTo: '/ucniacare' }
 

@@ -11,7 +11,7 @@ import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { environment } from './keys/environment';
 import { provideAuth } from '@angular/fire/auth';
 import { getAuth } from '@angular/fire/auth';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { provideHttpClient } from '@angular/common/http';
 
@@ -27,6 +27,7 @@ export const appConfig: ApplicationConfig = {
         provideRouter(routes),
         provideAnimationsAsync(),
         provideHttpClient(),
+        ConfirmationService,
         providePrimeNG({
             theme: {
                 preset: Aura,

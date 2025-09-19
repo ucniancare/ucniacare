@@ -231,7 +231,7 @@ export class FirebaseService {
 
                 const doc = snapshot.docs[0];
                 const user = { id: doc.id, ...doc.data() } as UserAccount;
-                const decrypted = this.dataSecurityService.decrypData(user.password!);
+                const decrypted = this.dataSecurityService.decryptData(user.password!);
                 if (decrypted === password) {
                     return user;
                 }

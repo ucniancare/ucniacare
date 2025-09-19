@@ -13,7 +13,8 @@ import { UserService } from './shared-services/user.service';
 import { LocalStorageService } from './shared-services/local-storage.service';
 import { COLLECTION } from './constants/firebase-collection.constants';
 import { LOCALSTORAGECONSTS } from './constants/local-storage.constants';
-
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ButtonModule } from 'primeng/button';
 @Component({
     selector: 'app-root',
     imports: [
@@ -24,7 +25,9 @@ import { LOCALSTORAGECONSTS } from './constants/local-storage.constants';
         ToastModule,
         SpinnerOverlayComponent,
         ProgressBarModule,
-        ProgressBarOverlayComponent
+        ProgressBarOverlayComponent,
+        ConfirmDialogModule,
+        ButtonModule
     ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',

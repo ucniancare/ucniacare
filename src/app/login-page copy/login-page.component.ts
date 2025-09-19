@@ -26,8 +26,6 @@ import { UserModel } from '../shared-models/user.model';
 import { OTPTemplateForm } from '../shared-interfaces/otp';
 import { OTPUtil } from '../shared-utils/otp-util';
 import { InputOtpModule } from 'primeng/inputotp';
-import { ChangePasswordData, ChangePasswordService } from '../change-password/change-password.service';
-import { PasswordModule } from 'primeng/password';
 @Component({
     selector: 'app-login-page',
     imports: [
@@ -41,8 +39,7 @@ import { PasswordModule } from 'primeng/password';
         MessageModule,
         ProgressBarModule,
         ReactiveFormsModule,
-        InputOtpModule,
-        PasswordModule
+        InputOtpModule
     ],
     templateUrl: './login-page.component.html',
     styleUrl: './login-page.component.css',
@@ -75,8 +72,7 @@ export class LoginPageComponent implements OnInit{
         private spinnerOverlayService: SpinnerOverlayService,
         private progressBarOverlayService: ProgressBarOverlayService,
         private dataSecurityService: DataSecurityService,
-        private userService: UserService,
-        private changePasswordService: ChangePasswordService
+        private userService: UserService
     ) {
     }
 
@@ -204,6 +200,7 @@ export class LoginPageComponent implements OnInit{
         ).subscribe();
     }
 
+    private isOTPExpired: boolean = false;
     protected verifyOTP(): void {
         this.isLoading.set(true);
         this.spinnerOverlayService.show('Verifying OTP...');
@@ -211,38 +208,11 @@ export class LoginPageComponent implements OnInit{
         this.firebaseService.getDataByField$<OTPTemplateForm>(COLLECTION.OTPS.COLLECTIONNAME, COLLECTION.OTPS.FIELDS.EMAIL, this.forgotPasswordForm.get('email')?.value || '').pipe(
             tap(otp => {
                 if (otp.length > 0) {
-                    const otpData: OTPTemplateForm = otp[0];;
-                    if (otpData.validUntil && otpData.validUntil > new Date().toISOString()) {
+                    const otpData: OTPTemplateForm = otp[0];
+                    this.isOTPExpired = !!otpData.validUntil && otpData.validUntil > new Date().toISOString() ;
+                    if (this.isOTPExpired) {
                         if (otpData.otp === this.otp()) {
-                            console.log("this.forgotPasswordForm.get('email')?.value", this.forgotPasswordForm.get('email')?.value);
-                            // First, get the user by email
-                            this.firebaseService.getDataByField$<User>(
-                                COLLECTION.USERS.COLLECTIONNAME, 
-                                COLLECTION.USERS.FIELDS.EMAIL, 
-                                this.forgotPasswordForm.get('email')?.value || ''
-                            ).pipe(
-                                tap(users => {
-                                    if (users.length > 0) {
-                                        const user = users[0];
-                                        console.log("user", user);
-                                        // Then get the user account using the userAccountId
-                                        this.firebaseService.getData$<UserAccount>(
-                                            COLLECTION.USERACCOUNTS.COLLECTIONNAME, 
-                                            user.userAccountId || ''
-                                        ).pipe(
-                                            tap((userAccount: UserAccount) => {
-                                                const changePasswordData: ChangePasswordData = {
-                                                    userAccountData: userAccount,
-                                                    changePasswordType: 'changePassword'
-                                                };
-                                                this.changePasswordService.changePasswordData.set(changePasswordData);
-                                                this.router.navigate(['/change-password']);
-                                            })
-                                        ).subscribe();
-                                    }
-                                })
-                            ).subscribe();
-                            
+                            console.log("matched!");
                         }
                         else {
                             this.messageService.add({ 

@@ -1,1 +1,3 @@
-
+:host ::ng-deep p-dialog-footer {
+    justify-content: center !important;
+}

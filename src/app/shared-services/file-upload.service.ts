@@ -6,7 +6,7 @@ import { UserAccount } from "../shared-interfaces/user-account";
 import { FirebaseService } from "./firebase.service";
 import { COLLECTION } from "../constants/firebase-collection.constants";
 import { GoogleToken } from "../shared-interfaces/google-token";
-import { SpinnerOverlayService } from "./spinner-overlay.service";
+import { SpinnerOverlayService } from "./primeng-services/spinner-overlay.service";
 
 @Injectable(
     { providedIn: 'root' }

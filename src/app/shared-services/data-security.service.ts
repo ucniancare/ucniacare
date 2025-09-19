@@ -8,11 +8,11 @@ export class DataSecurityService {
 
     private readonly ENCRYPTION_KEY = environment.cryptoJS.encryptionKey;
 
-    public encrypData(plain: string): string {
+    public encryptData(plain: string): string {
         return CryptoJS.AES.encrypt(plain, this.ENCRYPTION_KEY).toString();
     }
 
-    public decrypData(cipherText: string): string {
+    public decryptData(cipherText: string): string {
         try {
             const bytes = CryptoJS.AES.decrypt(cipherText, this.ENCRYPTION_KEY);
             const decrypted = bytes.toString(CryptoJS.enc.Utf8);

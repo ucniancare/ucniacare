@@ -16,6 +16,7 @@ import { FileUploadService } from '../shared-services/file-upload.service';
 import { GoogleDriveUtil } from '../shared-utils/google-drive-util';
 import emailjs, { type EmailJSResponseStatus } from '@emailjs/browser';
 import { GOOGLEDRIVEFOLDERCONSTS } from '../constants/google-drive-folders.constants';
+import { DialogOverlayService } from '../shared-services/primeng-services/dialog-overlay.service';
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
@@ -58,7 +59,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private userService: UserService,
         private firebaseService: FirebaseService,
         private fileUploadService: FileUploadService,
-        private httpClient: HttpClient
+        private httpClient: HttpClient,
+        private dialogOverlayService: DialogOverlayService
     ){
         this.user = this.userService.currentUser();
     }
@@ -139,6 +141,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         ]);
 
         this.imageUrl = GoogleDriveUtil.getImageUrl('1aMJ3LdphNpFie14ggqOFDzz9PqSojEKL');
+        
+    }
+
+    public test() {
         
     }
 

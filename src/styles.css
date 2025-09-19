@@ -6,7 +6,13 @@
 
 
 
-  :root {
-    --p-info-color: #3B82F6;       /* Tailwind blue-500 */
-    --p-info-color-text: #ffffff;  /* readable text on blue */
-  }
+:root {
+  --p-info-color: #3B82F6;
+  /* Tailwind blue-500 */
+  --p-info-color-text: #ffffff;
+  /* readable text on blue */
+}
+
+:host ::ng-deep .p-confirm-dialog .p-dialog-footer {
+  justify-content: center !important;
+}

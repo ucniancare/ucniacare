@@ -11,7 +11,7 @@
         <vital-signs-card *ngFor="let card of vitalSignsCards()" [basicDataCard]="card"></vital-signs-card>
     </div>
 
-    
+    <h1 (click)="test()">TEST TEST</h1>
 
     <button (click)="addUser()">Add User</button>
     <p-fileupload mode="basic" name="demo[]" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" [customUpload]="true" (onSelect)="onBasicUploadAuto($event)" [auto]="false" chooseLabel="Browse" [disabled]="uploadedFiles.length === 1" />

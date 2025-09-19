@@ -4,7 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { GoogleServicesService } from '../shared-services/google-services.service';
 import { FirebaseService } from '../shared-services/firebase.service';
 import { catchError, finalize, of, tap } from 'rxjs';
-import { SpinnerOverlayService } from '../shared-services/spinner-overlay.service';
+import { SpinnerOverlayService } from '../shared-services/primeng-services/spinner-overlay.service';
 import { APPCONSTS } from '../constants/data.constants';
 import { COLLECTION } from '../constants/firebase-collection.constants';
 import { GoogleToken } from '../shared-interfaces/google-token';

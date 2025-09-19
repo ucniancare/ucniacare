@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button';
 import { Router, RouterModule } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
 import { UserAuthService } from '../../shared-services/user-auth.service';
-import { ProgressBarOverlayService } from '../../shared-services/progress-bar-overlay.service';
+import { ProgressBarOverlayService } from '../../shared-services/primeng-services/progress-bar-overlay.service';
 import { catchError, finalize, of, tap } from 'rxjs';
 import { User } from '../../shared-interfaces/user';
 import { UserService } from '../../shared-services/user.service';

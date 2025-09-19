@@ -14,6 +14,7 @@ export const COLLECTION = {
             USERACCOUNTID: 'userAccountId',
             FIRSTNAME: 'firstName',
             LASTNAME: 'lastName',
+            EMAIL: 'email',
         },
     },
     GOOGLE_TOKEN: {
