@@ -45,7 +45,6 @@ export class AddUserComponent {
     protected processingProgress: number = 0;
     protected processingStatus: string = '';
     protected importedUsersData: any[] = [];
-    protected showDownloadButton: boolean = false;
 
     constructor(
         private firebaseService: FirebaseService,
@@ -62,7 +61,6 @@ export class AddUserComponent {
         this.processingProgress = 0;
         this.processingStatus = '';
         this.importedUsersData = [];
-        this.showDownloadButton = false;
     }
 
     onBasicUploadAuto(event: any) {
@@ -167,7 +165,9 @@ export class AddUserComponent {
                 this.isProcessing = false;
                 this.processingProgress = 100;
                 this.processingStatus = 'Complete!';
-                this.showDownloadButton = true;
+                
+                // Automatically download the Excel file
+                this.downloadImportedUsersExcel();
             })
             .catch((error) => {
                 console.error('Error processing users:', error);

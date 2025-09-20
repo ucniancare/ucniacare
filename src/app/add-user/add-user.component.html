@@ -36,18 +36,8 @@
     
     <div *ngIf="!isProcessing && processingProgress === 100" class="mt-4 text-center">
         <p class="text-green-600 font-semibold">✓ Import completed successfully!</p>
-        <div *ngIf="showDownloadButton" class="mt-3">
-            <button 
-                pButton 
-                type="button" 
-                label="Download Users Excel" 
-                icon="pi pi-download" 
-                class="p-button-success"
-                (click)="downloadImportedUsersExcel()">
-            </button>
-            <p class="text-xs text-gray-600 mt-2">
-                Download contains: Complete Name, UC ID Number, Password (unencrypted), Email
-            </p>
-        </div>
+        <p class="text-xs text-gray-600 mt-2">
+            Excel file with user details has been automatically downloaded.
+        </p>
     </div>
 </div>
