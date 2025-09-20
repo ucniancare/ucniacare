@@ -36,7 +36,7 @@ import { ImageSrcPipe } from '../../shared-pipes/google-drive-image.pipe';
 })
 export class TopToolbarComponent implements OnInit {
 
-    protected user = signal<User | null>(null);
+    protected user!: typeof this.userService.currentUser;
     protected items: MenuItem[] = [];
     
 
@@ -46,8 +46,7 @@ export class TopToolbarComponent implements OnInit {
         private router: Router,
         private userService: UserService
     ) {
-        console.log("TopToolbarComponent constructor");
-        this.user.set(this.userService.currentUser());
+        this.user = this.userService.currentUser;
     }
 
     ngOnInit() {    

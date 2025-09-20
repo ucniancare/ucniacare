@@ -11,6 +11,7 @@ export class UserAccountModel {
             password: json.password,
             isLoggedIn: json.isLoggedIn,
             lastLogin: json.lastLogin,
+            isFirstLogin: json.isFirstLogin,
             metaData: json.metaData
         };
     }
@@ -22,6 +23,7 @@ export class UserAccountModel {
             ...(userAccount.password !== undefined && { password: userAccount.password }),
             ...(userAccount.isLoggedIn !== undefined && { isLoggedIn: userAccount.isLoggedIn }),
             ...(userAccount.lastLogin !== undefined && { lastLogin: userAccount.lastLogin }),
+            ...(userAccount.isFirstLogin !== undefined && { isFirstLogin: userAccount.isFirstLogin }),
             ...(userAccount.metaData !== undefined && { metaData: userAccount.metaData })
         }
     }
@@ -33,6 +35,7 @@ export class UserAccountModel {
             password: userAccount.password,
             isLoggedIn: userAccount.isLoggedIn,
             lastLogin: userAccount.lastLogin,
+            isFirstLogin: userAccount.isFirstLogin,
             metaData: userAccount.metaData
         };
     }

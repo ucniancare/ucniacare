@@ -6,6 +6,7 @@ export const COLLECTION = {
             PASSWORD: 'password',
             ISLOGGEDIN: 'isLoggedIn',
             LASTLOGIN: 'lastLogin',
+            ISFIRSTLOGIN: 'isFirstLogin',
         },
     },
     USERS: {

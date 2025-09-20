@@ -1,6 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { UserAccount } from '../shared-interfaces/user-account';
 import { User } from '../shared-interfaces/user';
+import { LocalStorageService } from './local-storage.service';
+import { LOCALSTORAGECONSTS } from '../constants/local-storage.constants';
 
 @Injectable({
     providedIn: 'root'
@@ -12,6 +14,7 @@ export class UserService {
     public currentUser = signal<User | null>(null);
     
     constructor(
+        private localStorageService: LocalStorageService
     ) {
 
     }
@@ -26,6 +29,7 @@ export class UserService {
 
     public setCurrentUser(user: User | null): void {
         this.currentUser.set(user);
+        this.localStorageService.set(LOCALSTORAGECONSTS.USER, user);
     }
 
     public getCurrentUser(): User | null {

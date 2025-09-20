@@ -66,7 +66,6 @@ export class UserAuthService {
     }
 
     public logoutUser(): Observable<boolean> {
-        console.log('user',this.userService.getCurrentUserAccount());
         return this.firebaseService.updateData$(COLLECTION.USERACCOUNTS.COLLECTIONNAME, this.userService.getCurrentUserAccount()!.id!, { isLoggedIn: false, }).pipe(
             map(() => {
                 this.localStorageService.clear();
@@ -83,9 +82,6 @@ export class UserAuthService {
     public sendOTP(data: OTPTemplateForm): Observable<boolean> {
         return this.firebaseService.getAllData$<OTPTemplateForm>(COLLECTION.OTPS.COLLECTIONNAME, OTPModel.fromJson).pipe(
             take(1), 
-            tap((otps: OTPTemplateForm[]) => {
-                console.log('otpRequests: ', otps);
-            }),
             switchMap((otps: OTPTemplateForm[]) => {
                 const existingOTP = otps.find(otp => otp.email === data.email);
                 
@@ -105,7 +101,7 @@ export class UserAuthService {
                     }
                     
                 }
-                
+
                 return this.firebaseService.deleteDataByField$(COLLECTION.OTPS.COLLECTIONNAME, COLLECTION.OTPS.FIELDS.EMAIL, data.email).pipe(
                     switchMap(() => 
                         this.firebaseService.addData$<OTPTemplateForm>(COLLECTION.OTPS.COLLECTIONNAME, data, OTPModel.toJson, OTPModel.fromJson)

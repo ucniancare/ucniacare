@@ -20,9 +20,9 @@
         <div *ngFor="let img of uploadedImages">
           <img [src]="img" alt="preview" class="w-32 h-32 object-cover rounded shadow" />
         </div>
-      </div>
+    </div>
 
-      <p-button (click)="send()">Send Email</p-button>
+    <button (click)="openDialog()">Open Dialog</button>
 
     
 </div>

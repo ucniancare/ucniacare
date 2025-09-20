@@ -169,37 +169,61 @@ export class LoginPageComponent implements OnInit{
     }
 
     protected forgotPassword(): void {
-
         this.isLoading.set(true);
-        this.spinnerOverlayService.show('Sending OTP...');
-
-        const data: OTPTemplateForm = OTPUtil.generateOTP(this.forgotPasswordForm.get('email')?.value || '');
-        this.userAuthService.sendOTP(data).pipe(
-            tap(success => {
-                if (success) {
-                    this.messageService.add({ 
-                        severity: 'success', 
-                        summary: 'Email Sent!', 
-                        detail: 'Please check your email for the reset code. The code will expire in 15 minutes.',
-                        life: 5000
-                    });
+        this.spinnerOverlayService.show('Verifying email...');
+        this.firebaseService.getDataByField$<User>(COLLECTION.USERS.COLLECTIONNAME, COLLECTION.USERS.FIELDS.EMAIL, this.forgotPasswordForm.get('email')?.value || '').pipe(
+            tap(users => {
+                if (users && users.length > 0) {
+                    // Email exists, proceed to send OTP
+                    this.spinnerOverlayService.show('Sending OTP...');
                     
+                    const data: OTPTemplateForm = OTPUtil.generateOTP(this.forgotPasswordForm.get('email')?.value || '');
+                    this.userAuthService.sendOTP(data).pipe(
+                        tap(success => {
+                            if (success) {
+                                this.messageService.add({ 
+                                    severity: 'success', 
+                                    summary: 'Email Sent!', 
+                                    detail: 'Please check your email for the reset code. The code will expire in 15 minutes.',
+                                    life: 5000
+                                });
+                                this.isOTPSent.set(true);
+                            } else {
+                                this.messageService.add({ 
+                                    severity: 'error', 
+                                    summary: 'Error', 
+                                    detail: 'Failed to send reset code. Please try again.',
+                                    life: 5000
+                                });
+                            }
+                        }),
+                        catchError(error => {
+                            console.error('Send OTP error:', error);
+                            this.messageService.add({ 
+                                severity: 'error', 
+                                summary: 'Error', 
+                                detail: 'An unexpected error occurred while sending the reset code. Please try again later.',
+                                life: 5000
+                            });
+                            return of(false);
+                        }),
+                        finalize(() => {
+                            this.spinnerOverlayService.hide();
+                            this.isLoading.set(false);
+                        })
+                    ).subscribe();
                 }
-                this.isOTPSent.set(true);
             }),
             catchError(error => {
-                console.error('Forgot password error:', error);
                 this.messageService.add({ 
                     severity: 'error', 
-                    summary: 'Error', 
-                    detail: 'An unexpected error occurred. Please try again later.',
+                    summary: 'Email Not Found', 
+                    detail: 'The email address you entered is not associated with any account. Please check your email and try again.',
                     life: 5000
                 });
-                return of(false);
-            }),
-            finalize(() => {
                 this.spinnerOverlayService.hide();
                 this.isLoading.set(false);
+                return of(null);
             })
         ).subscribe();
     }
@@ -214,8 +238,6 @@ export class LoginPageComponent implements OnInit{
                     const otpData: OTPTemplateForm = otp[0];;
                     if (otpData.validUntil && otpData.validUntil > new Date().toISOString()) {
                         if (otpData.otp === this.otp()) {
-                            console.log("this.forgotPasswordForm.get('email')?.value", this.forgotPasswordForm.get('email')?.value);
-                            // First, get the user by email
                             this.firebaseService.getDataByField$<User>(
                                 COLLECTION.USERS.COLLECTIONNAME, 
                                 COLLECTION.USERS.FIELDS.EMAIL, 
@@ -224,8 +246,6 @@ export class LoginPageComponent implements OnInit{
                                 tap(users => {
                                     if (users.length > 0) {
                                         const user = users[0];
-                                        console.log("user", user);
-                                        // Then get the user account using the userAccountId
                                         this.firebaseService.getData$<UserAccount>(
                                             COLLECTION.USERACCOUNTS.COLLECTIONNAME, 
                                             user.userAccountId || ''

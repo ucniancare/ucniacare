@@ -54,7 +54,7 @@ export class FileUploadService {
                             return this.uploadToFolder(accessToken, file, targetFolderId);
                         }
 
-                        const metadata = {
+                        /*const metadata = {
                             name: file.name,
                             mimeType: file.type,
                             parents: [targetFolderId] 
@@ -86,7 +86,7 @@ export class FileUploadService {
                                     })
                                 )
                             )
-                        );
+                        );*/
                     })
                 )
             ),

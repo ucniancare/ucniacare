@@ -19,8 +19,7 @@ export class EmailJsService {
         return new Observable<boolean>(observer => {
             emailjs.send(this.serviceId, this.otpTemplateId, data, {
                 publicKey: this.publicKey
-            }).then((response) => {
-                console.log('Email sent successfully', response);
+            }).then(() => {
                 observer.next(true);
                 observer.complete();
             }).catch((error) => {

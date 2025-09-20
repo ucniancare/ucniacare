@@ -8,6 +8,7 @@ import { SpinnerOverlayService } from '../shared-services/primeng-services/spinn
 import { APPCONSTS } from '../constants/data.constants';
 import { COLLECTION } from '../constants/firebase-collection.constants';
 import { GoogleToken } from '../shared-interfaces/google-token';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-dev-tools',
@@ -26,7 +27,8 @@ export class DevToolsComponent implements OnInit {
         private router: Router,
         private googleServicesService: GoogleServicesService,
         private firebaseService: FirebaseService,
-        private spinnerOverlayService: SpinnerOverlayService
+        private spinnerOverlayService: SpinnerOverlayService,
+        private messageService: MessageService
     ) {
         
     }
@@ -36,7 +38,6 @@ export class DevToolsComponent implements OnInit {
         const password = prompt('Enter password for dev tools:');
         if (password === '123') {
             this.isAuthenticated.set(true);
-            console.log('DevToolsComponent initialized');
         } else {
             this.isAuthenticated.set(false);
             this.router.navigate(['/']);        
@@ -46,7 +47,6 @@ export class DevToolsComponent implements OnInit {
     async getGoogleDriveToken() {
         this.spinnerOverlayService.show('Getting Google Drive Token...');
         const token = await this.googleServicesService.signInWithGoogle();
-        console.log("token", token);
         const googleToken: GoogleToken = {
             accessToken: token ?? '',
             metaData: {
@@ -61,11 +61,13 @@ export class DevToolsComponent implements OnInit {
             tap(() => {
                 this.firebaseService.addData$(COLLECTION.GOOGLE_TOKEN.COLLECTIONNAME, googleToken).pipe(
                     finalize(() => {
+                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Google Drive Token added successfully' });
                         this.spinnerOverlayService.hide();
                     })
                 ).subscribe();
             }),
             catchError(err => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error adding Google Drive Token' });
                 return of(null);
             }),
         ).subscribe();

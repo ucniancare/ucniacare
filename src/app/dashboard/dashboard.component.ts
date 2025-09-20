@@ -4,7 +4,7 @@ import { BasicDataCardComponent, BasicDataCard } from '../shared-components/basi
 import { CommonModule } from '@angular/common';
 import { VitalSignsCardComponent } from '../shared-components/vital-signs-card/vital-signs-card.component';
 import { FileSelectEvent, FileUploadEvent, FileUploadModule } from 'primeng/fileupload';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { User } from '../shared-interfaces/user';
 import { COLLECTION } from '../constants/firebase-collection.constants';
@@ -17,6 +17,10 @@ import { GoogleDriveUtil } from '../shared-utils/google-drive-util';
 import emailjs, { type EmailJSResponseStatus } from '@emailjs/browser';
 import { GOOGLEDRIVEFOLDERCONSTS } from '../constants/google-drive-folders.constants';
 import { DialogOverlayService } from '../shared-services/primeng-services/dialog-overlay.service';
+import { LocalStorageService } from '../shared-services/local-storage.service';
+import { LOCALSTORAGECONSTS } from '../constants/local-storage.constants';
+import { DynamicDialogData, DynamicDialogService } from '../shared-components/dynamic-dialog/dynamic-dialog.service';
+import { AddUserComponent } from '../add-user/add-user.component';
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
@@ -60,7 +64,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private firebaseService: FirebaseService,
         private fileUploadService: FileUploadService,
         private httpClient: HttpClient,
-        private dialogOverlayService: DialogOverlayService
+        private dialogOverlayService: DialogOverlayService,
+        private confirmationService: ConfirmationService,
+        private localStorageService: LocalStorageService,
+        private dynamicDialogService: DynamicDialogService
     ){
         this.user = this.userService.currentUser();
     }
@@ -145,7 +152,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     public test() {
-        
+        // this.confirmationService.confirm({
+        //     target: event?.target as EventTarget,
+        //     message: 'Do you want to delete this record?',
+        //     header: 'Danger Zone',
+        //     icon: 'pi pi-info-circle',
+        //     rejectVisible: false,
+        //     rejectLabel: 'Cancel',
+        //     rejectButtonProps: {
+        //         label: 'Cancel',
+        //         severity: 'secondary',
+        //         outlined: true,
+        //     },
+        //     acceptButtonProps: {
+        //         label: 'Delete',
+        //         severity: 'danger',
+        //     },
+
+        //     accept: () => {
+        //     },
+        //     reject: () => {
+        //         this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
+        //     },
+        // });
     }
 
     onBasicUploadAuto(event: FileSelectEvent) {
@@ -185,7 +214,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     );
                 }),
                 tap(user => {
-                    console.log('User updated successfully:', user);
+                    this.userService.setCurrentUser(user);
                     this.messageService.add({ 
                         severity: 'success', 
                         summary: 'Success', 
@@ -249,20 +278,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         ).subscribe();
     }
 
-    send() {
-        console.log('exec');
-        const form: ContactForm = {
-            email: 'belsmarie28@gmail.com',
-            otp: '901242',
-            time: '09:45pm',
+    openDialog() {
+        const dynamicDialogData: DynamicDialogData = {
+            component: AddUserComponent,
+            title: 'Add User'
         }
-        emailjs.send('service_fuo2bdo', 'template_jmyzhjo', form, {
-            publicKey: 'Gm2kj3jWLJStfSFNQ'
-        }).then(()=> {
-            console.log('Email sent successfully');
-        }).catch((error) => {
-            console.log(error);
-        })
+        this.dynamicDialogService.open(dynamicDialogData);
     }
 
     ngOnDestroy() {

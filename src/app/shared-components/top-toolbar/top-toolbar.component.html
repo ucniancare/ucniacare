@@ -13,6 +13,7 @@
         <div class="flex items-center gap-2 mr-4">
             <div class="card flex justify-center">
                 <p-menu #menu [model]="items" [popup]="true" appendTo="body"/> 
+                <h1>Test: {{ user()?.profilePicture }}</h1>
                 <img (click)="menu.toggle($event)" [src]="user()?.profilePicture | imageSrc" alt="profile picture" class="w-12 h-12 object-cover cursor-pointer rounded-full" />
                 <!-- <p-button  size="large" class="ml-2" severity="secondary" /> -->
             </div>

@@ -6,5 +6,6 @@ export class UserAccount {
     password?: string;
     isLoggedIn?: boolean;
     lastLogin?: Date;
+    isFirstLogin?: boolean;
     metaData?: MetaData;
 }

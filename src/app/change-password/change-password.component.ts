@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { PasswordModule } from 'primeng/password';
 import { Route, Router, RouterModule } from '@angular/router';
 import { ChangePasswordData, ChangePasswordService } from './change-password.service';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { FirebaseService } from '../shared-services/firebase.service';
 import { COLLECTION } from '../constants/firebase-collection.constants';
 import { UserAccount } from '../shared-interfaces/user-account';
@@ -49,7 +49,8 @@ export class ChangePasswordComponent implements OnInit{
         private spinnerOverlayService: SpinnerOverlayService,
         private dataSecurityService: DataSecurityService,
         private dialogOverlayService: DialogOverlayService,
-        private router: Router
+        private router: Router,
+        private confirmationService: ConfirmationService
     ){
 
     }
@@ -68,18 +69,24 @@ export class ChangePasswordComponent implements OnInit{
                 tap(success => {
                     if (success) {
                         if (this.changePasswordData()?.changePasswordType === 'changePassword') {
-                            this.dialogOverlayService.openDialog({
-                                header: 'Success',
+                            this.confirmationService.confirm({
+                                target: event?.target as EventTarget,
                                 message: 'Your password has been changed successfully.',
-                                isRejectVisible: false,
+                                header: 'Success',
                                 icon: 'pi pi-check',
-                                acceptLabel: 'OK',
+                                rejectVisible: false,
+                                acceptButtonProps: {
+                                    label: 'OK',
+                                    severity: 'primary',
+                                    size: 'small',
+                                },
+                    
                                 accept: () => {
                                     this.router.navigate(['/login']);
                                 },
                                 reject: () => {
                                     this.router.navigate(['/login']);
-                                }
+                                },
                             });
                         }
                     }

@@ -1,13 +1,6 @@
 <spinner-overlay></spinner-overlay>
 <progress-bar-overlay></progress-bar-overlay>
-<p-confirmdialog>
-    <ng-template #message let-message>
-        <div class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700">
-            <i [ngClass]="message.icon" class="!text-6xl text-primary-500"></i>
-            <p class="mb-4">{{ message.message }}</p>
-        </div>
-    </ng-template>
-</p-confirmdialog>
+<p-confirmdialog [draggable]="false" />
 <div class="flex h-screen overflow-hidden">
     <p-toast position="top-right"></p-toast>
     <side-bar-menu *ngIf="showSideBarMenu()" class="shrink-0 sticky top-0 h-screen"></side-bar-menu>
