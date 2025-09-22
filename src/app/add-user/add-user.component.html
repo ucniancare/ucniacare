@@ -7,8 +7,8 @@
         <div class="mt-4 w-[360px] p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p class="text-sm font-semibold text-blue-800 mb-2">Required Excel Columns:</p>
             <p class="text-xs text-blue-700">
-                <strong>Required:</strong> ucIdNumber, firstName, lastName, email<br>
-                <strong>Optional:</strong> middleName, extName, sex, phoneNumber, maritalStatus, userRoles (comma-separated)
+                <strong>Required:</strong> ucIdNumber, firstName, lastName, email, phoneNumber, sex, userRoles (comma-separated), maritalStatus, dateOfBirth<br>
+                <strong>Optional:</strong> middleName, extName
             </p>
             <p class="text-xs text-blue-600 mt-1 mt-4">
                 <em>Note: Passwords will be auto-generated (8 characters) and users will be set to first login.</em>
@@ -40,4 +40,59 @@
             Excel file with user details has been automatically downloaded.
         </p>
     </div>
+</div>
+<div *ngIf="selectedState === 'manual'">
+    <div class="mt-4">
+        <form [formGroup]="addUserForm">
+            <p-floatlabel variant="on" class="mt-4">
+                <p-inputnumber formControlName="ucIdNumber" mode="decimal" inputId="withoutgrouping" [useGrouping]="false" fluid/>
+                <label for="idNumber">UC ID Number</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <input pInputText id="firstName" formControlName="firstName" autocomplete="off" fluid />
+                <label for="firstName">First Name</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <input pInputText id="middleName" formControlName="middleName" autocomplete="off" fluid />
+                <label for="middleName">Middle Name</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <input pInputText id="lastName" formControlName="lastName" autocomplete="off" fluid />
+                <label for="lastName">Last Name</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <p-select formControlName="extName" inputId="extName" [options]="extNameOptions" optionLabel="name" fluid />
+                <label for="extName">Extension Name</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <p-select formControlName="sex" inputId="sex" [options]="sexOptions" optionLabel="name" fluid />
+                <label for="sex">Sex</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <input pInputText id="email" formControlName="email" autocomplete="off" fluid />
+                <label for="email">Email</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <input pInputText id="phoneNumber" formControlName="phoneNumber" autocomplete="off" fluid />
+                <label for="phoneNumber">Phone Number</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <p-datepicker formControlName="dateOfBirth" inputId="dateOfBirth" showIcon iconDisplay="input" fluid />
+                <label for="dateOfBirth">Date of Birth</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <p-select formControlName="maritalStatus" inputId="maritalStatus" [options]="maritalStatusOptions" optionLabel="name" fluid />
+                <label for="maritalStatus">Marital Status</label>
+            </p-floatlabel>
+            <p-floatlabel variant="on" class="mt-4">
+                <p-multiselect formControlName="userRoles" [options]="userRoleOptions" inputId="userRoles" optionLabel="name" display="chip" fluid/>
+                <label for="userRoles">User Roles</label>
+            </p-floatlabel>
+            <div class="mt-4">
+                <p-button type="submit" label="Add User" icon="fa-solid fa-user-plus" fluid/>
+            </div>
+
+        </form>
+    </div>
+    
 </div>

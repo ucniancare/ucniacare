@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
 import { CommonModule } from '@angular/common';
@@ -18,6 +18,30 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { PasswordUtil } from '../shared-utils/password-util';
 import { APPCONSTS } from '../constants/data.constants';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { MultiSelectModule } from 'primeng/multiselect';
+interface SexOption {
+    name: string;
+}
+
+interface MaritalStatusOption {
+    name: string;
+}
+
+interface ExtNameOption {
+    name: string;
+}
+
+interface UserRoleOption {
+    name: string;
+}
+
+
+
 
 @Component({
     selector: 'add-user',
@@ -28,13 +52,52 @@ import { APPCONSTS } from '../constants/data.constants';
         CommonModule,
         DividerModule,
         ProgressBarModule,
-        ButtonModule
+        ButtonModule,
+        FloatLabelModule,
+        ReactiveFormsModule,
+        InputTextModule,
+        InputNumberModule,
+        SelectModule,
+        DatePickerModule,
+        MultiSelectModule
     ],
     templateUrl: './add-user.component.html',
     styleUrl: './add-user.component.css',
     standalone: true
 })
 export class AddUserComponent {
+
+    protected userRoleOptions: UserRoleOption[] = [
+        { name: 'Super Admin' },
+        { name: 'Admin' },
+        { name: 'Doctor' },
+        { name: 'Patient' },
+        { name: 'Nurse' },
+        { name: 'Staff' }
+    ];
+
+    protected sexOptions: SexOption[] = [
+        { name: 'Male' },
+        { name: 'Female' }
+    ];
+    protected maritalStatusOptions: MaritalStatusOption[] = [
+        { name: 'Single' },
+        { name: 'Married' },
+        { name: 'Divorced' },
+        { name: 'Widowed' }
+    ];
+    protected extNameOptions: ExtNameOption[] = [
+        { name: 'Jr.' },
+        { name: 'Sr.' },
+        { name: 'II' },
+        { name: 'III' },
+        { name: 'IV' },
+        { name: 'V' },
+        { name: 'Not Applicable' }
+    ];
+    protected selectedSex: SexOption = this.sexOptions[0];
+    protected selectedMaritalStatus: MaritalStatusOption = this.maritalStatusOptions[0];
+    protected selectedExtName: ExtNameOption = this.extNameOptions[0];
 
     protected stateOptions: any[] = [
         { label: 'Manual', value: 'manual' },
@@ -45,6 +108,20 @@ export class AddUserComponent {
     protected processingProgress: number = 0;
     protected processingStatus: string = '';
     protected importedUsersData: any[] = [];
+
+    protected addUserForm = new FormGroup({
+        ucIdNumber: new FormControl(null, [Validators.required]),
+        firstName: new FormControl('', [Validators.required]),
+        middleName: new FormControl(''),
+        lastName: new FormControl('', [Validators.required]),
+        extName: new FormControl(null),
+        sex: new FormControl(null, [Validators.required]),
+        email: new FormControl('', [Validators.required, Validators.email]),
+        phoneNumber: new FormControl('', [Validators.required]),
+        dateOfBirth: new FormControl(null, [Validators.required]),
+        maritalStatus: new FormControl(null, [Validators.required]),
+        userRoles: new FormControl(null, [Validators.required]),
+    });
 
     constructor(
         private firebaseService: FirebaseService,
