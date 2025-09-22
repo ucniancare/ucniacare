@@ -38,7 +38,7 @@ export class AddUserComponent {
 
     protected stateOptions: any[] = [
         { label: 'Manual', value: 'manual' },
-        { label: 'Import', value: 'import' }
+        { label: 'Import Excel File', value: 'import' }
     ];
     protected selectedState: string = 'manual';
     protected isProcessing: boolean = false;
@@ -126,7 +126,7 @@ export class AddUserComponent {
             return;
         }
 
-        this.processingStatus = `Processing ${dataRows.length} users...`;
+        this.processingStatus = `Processing...`;
         this.createUsersFromExcelData(headers, dataRows);
     }
 
@@ -150,8 +150,6 @@ export class AddUserComponent {
                     }
                 });
                 userCreationPromises.push(promise);
-            } else {
-                console.warn(`Skipping row ${index + 2}: Missing required data`, userData);
             }
         });
 
@@ -166,7 +164,6 @@ export class AddUserComponent {
                 this.processingProgress = 100;
                 this.processingStatus = 'Complete!';
                 
-                // Automatically download the Excel file
                 this.downloadImportedUsersExcel();
             })
             .catch((error) => {
@@ -216,6 +213,12 @@ export class AddUserComponent {
                         break;
                     case 'userroles':
                         userData.userRoles = value.split(',').map((role: string) => role.trim());
+                        break;
+                    case 'dateofbirth':
+                        const parsedDate = this.parseDateFromExcel(value);
+                        if (parsedDate) {
+                            userData.dateOfBirth = parsedDate;
+                        }
                         break;
                 }
             }
@@ -276,6 +279,7 @@ export class AddUserComponent {
             if (userData.extName) user.extName = userData.extName;
             if (userData.sex) user.sex = userData.sex;
             if (userData.phoneNumber) user.phoneNumber = userData.phoneNumber;
+            if (userData.dateOfBirth) user.dateOfBirth = userData.dateOfBirth;
             if (userData.maritalStatus) user.maritalStatus = userData.maritalStatus;
             if (userData.userRoles && userData.userRoles.length > 0) user.userRoles = userData.userRoles;
             
@@ -306,6 +310,34 @@ export class AddUserComponent {
         } catch (error) {
             console.error('Error creating user:', error);
             throw error;
+        }
+    }
+
+    private parseDateFromExcel(value: string): Date | null {
+        try {
+            const numericValue = parseFloat(value);
+            if (!isNaN(numericValue)) {
+                const excelEpoch = new Date(1900, 0, 1);
+                const daysSinceEpoch = numericValue - 2;
+                const date = new Date(excelEpoch.getTime() + (daysSinceEpoch * 24 * 60 * 60 * 1000));
+                
+                const currentYear = new Date().getFullYear();
+                if (date.getFullYear() >= 1900 && date.getFullYear() <= currentYear + 10) {
+                    return date;
+                }
+            }
+            
+            const dateValue = new Date(value);
+            if (!isNaN(dateValue.getTime())) {
+                const currentYear = new Date().getFullYear();
+                if (dateValue.getFullYear() >= 1900 && dateValue.getFullYear() <= currentYear + 10) {
+                    return dateValue;
+                }
+            }
+            
+            return null;
+        } catch (error) {
+            return null;
         }
     }
 

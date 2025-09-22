@@ -91,7 +91,7 @@ export class LoginPageComponent implements OnInit{
         this.loginErrorMessage.set(''); // Clear previous errors
         
         this.userAuthService.loginUser(this.loginForm.get('idNumber')?.value || '', this.loginForm.get('password')?.value || '').pipe(
-            tap(user => {
+            tap((user: User | null) => {
                 if (user) {
                     this.messageService.add({ 
                         severity: 'success', 
@@ -100,7 +100,8 @@ export class LoginPageComponent implements OnInit{
                         life: 3000
                     });
                     this.router.navigate(['/dashboard']);
-                } else {
+                }
+                else {
                     this.loginErrorMessage.set('Invalid ID number or password.');
                 }
             }),

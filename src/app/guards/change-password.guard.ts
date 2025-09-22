@@ -16,7 +16,7 @@ export class ChangePasswordGuard implements CanActivate {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
 
         const changePasswordData: ChangePasswordData = this.changePasswordService.changePasswordData();
-        if (changePasswordData) {
+        if (changePasswordData.userAccountData) {
             return true; 
         } 
         

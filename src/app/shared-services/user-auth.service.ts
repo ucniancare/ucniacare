@@ -12,6 +12,8 @@ import { EmailJsService } from './email-js.service';
 import { OTPTemplateForm } from '../shared-interfaces/otp';
 import { OTPModel } from '../shared-models/otp.model';
 import { MessageService } from 'primeng/api';
+import { ChangePasswordService } from '../change-password/change-password.service';
+import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -25,15 +27,26 @@ export class UserAuthService {
         private localStorageService: LocalStorageService,
         private userService: UserService,
         private emailJsService: EmailJsService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private changePasswordService: ChangePasswordService,
+        private router: Router
     ) {
 
     }
 
-    public loginUser(idNumber: string, password: string): Observable<UserAccount | null> {
+    public loginUser(idNumber: string, password: string): Observable<User | null> {
         return this.firebaseService.authenticateUser$(idNumber, password).pipe(
-            switchMap(user => {                
+            switchMap((user: UserAccount | null) => {                
                 if (!user) return of(null);
+
+                if (user.isFirstLogin) {
+                    this.changePasswordService.changePasswordData.set({
+                        userAccountData: user,
+                        changePasswordType: 'changePasswordFirstTime'
+                    });
+                    this.router.navigate(['/change-password']);
+                    return of(null);
+                }
 
                 // Set local storage for userAccount
                 this.localStorageService.set(LOCALSTORAGECONSTS.USERACCOUNT, user);
