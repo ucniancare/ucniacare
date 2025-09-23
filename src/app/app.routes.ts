@@ -8,7 +8,7 @@ import { LoginGuard } from './guards/login.guard';
 import { DevToolsComponent } from './dev-tools/dev-tools.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { ChangePasswordGuard } from './guards/change-password.guard';
-import { AddUserComponent } from './add-user/add-user.component';
+import { AddUserComponent } from './shared-forms/add-user/add-user.component';
 
 export const routes: Routes = [
     
@@ -80,15 +80,6 @@ export const routes: Routes = [
         },
         canActivate: [ChangePasswordGuard]
     },
-    // {
-    //     path: 'add-user',
-    //     component: AddUserComponent,
-    //     data: { 
-    //         sideBarMenu: false, 
-    //         topToolbar: false 
-    //     },
-    //     canActivate: [AuthGuard]
-    // },
     { path: '**', redirectTo: '/ucniacare' }
 
 ];

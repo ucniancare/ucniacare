@@ -20,7 +20,8 @@ import { DialogOverlayService } from '../shared-services/primeng-services/dialog
 import { LocalStorageService } from '../shared-services/local-storage.service';
 import { LOCALSTORAGECONSTS } from '../constants/local-storage.constants';
 import { DynamicDialogData, DynamicDialogService } from '../shared-components/dynamic-dialog/dynamic-dialog.service';
-import { AddUserComponent } from '../add-user/add-user.component';
+import { AddUserComponent } from '../shared-forms/add-user/add-user.component';
+import { AddAppointmentComponent } from '../shared-forms/add-appointment/add-appointment.component';
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
@@ -282,6 +283,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const dynamicDialogData: DynamicDialogData = {
             component: AddUserComponent,
             title: 'Add User'
+        }
+        this.dynamicDialogService.open(dynamicDialogData);
+    }
+
+    openAddAppointmentDialog() {
+        const dynamicDialogData: DynamicDialogData = {
+            component: AddAppointmentComponent,
+            title: 'Add Appointment'
         }
         this.dynamicDialogService.open(dynamicDialogData);
     }

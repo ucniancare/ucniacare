@@ -1,7 +1,7 @@
 <div class="p-8">
     <div class="flex justify-between">
         <h1 class="text-3xl sm:text-5xl md:text-2xl font-bold text-balance text-gray-700">Welcome back, Clifford!</h1>
-        <p-button label="Add Appointment" severity="primary" icon="fa-solid fa-calendar-plus" iconPos="left" />
+        <p-button label="Add Appointment" severity="primary" icon="fa-solid fa-calendar-plus" iconPos="left" (click)="openAddAppointmentDialog()" />
     </div>
     <div class="flex gap-4">
         <basic-data-card *ngFor="let card of basicDataCards()" [basicDataCard]="card"></basic-data-card>

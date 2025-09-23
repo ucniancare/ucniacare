@@ -1,0 +1,80 @@
+<div class="mt-4">
+    <form [formGroup]="addAppointmentForm">
+        <p-floatlabel variant="on" class="mt-4">
+            <p-select formControlName="type" inputId="type" [options]="appointmentTypeOptions" optionLabel="name" appendTo="body" fluid />
+            <label for="type">Type</label>
+        </p-floatlabel>
+        <div *ngIf="addAppointmentForm.get('type')?.invalid && addAppointmentForm.get('type')?.touched" class="text-red-500 text-sm mt-1">
+            Type is required
+        </div>
+        <p-floatlabel variant="on" class="mt-4">
+            <p-datepicker formControlName="date" inputId="date" showIcon iconDisplay="input" [minDate]="minDate" appendTo="body" fluid />
+            <label for="date">Date</label>
+        </p-floatlabel>
+        <div *ngIf="addAppointmentForm.get('date')?.invalid && addAppointmentForm.get('date')?.touched" class="text-red-500 text-sm mt-1">
+            Date is required
+        </div>
+        <p-floatlabel variant="on" class="mt-4">
+            <p-datepicker inputId="time" formControlName="from" [hourFormat]="'12'" [timeOnly]="true" appendTo="body" fluid/>
+            <label for="from">From</label>
+        </p-floatlabel>
+        <div *ngIf="addAppointmentForm.get('from')?.invalid && addAppointmentForm.get('from')?.touched" class="text-red-500 text-sm mt-1">
+            From time is required
+        </div>
+        <p-floatlabel variant="on" class="mt-4">
+            <p-datepicker inputId="time" formControlName="to" [hourFormat]="'12'" [timeOnly]="true" appendTo="body" fluid/>
+            <label for="to">To</label>
+        </p-floatlabel>
+        <div *ngIf="addAppointmentForm.get('to')?.invalid && addAppointmentForm.get('to')?.touched" class="text-red-500 text-sm mt-1">
+            To time is required
+        </div>
+        <div *ngIf="addAppointmentForm.errors?.['timeRange'] && (addAppointmentForm.get('from')?.touched || addAppointmentForm.get('to')?.touched)" class="text-red-500 text-sm mt-1">
+            From time must be before To time
+        </div>
+        <p-floatlabel variant="on" class="mt-4">
+            <textarea rows="5"cols="30" pTextarea formControlName="notes" appendTo="body" fluid></textarea>
+            <label for="notes">Notes</label>
+        </p-floatlabel>
+        <div class="mt-4">
+            <p-fileupload 
+                mode="basic" 
+                name="demo[]" 
+                chooseIcon="pi pi-upload" 
+                maxFileSize="10000000" 
+                [customUpload]="true" 
+                (onSelect)="onUploadFiles($event)" 
+                [auto]="false" 
+                chooseLabel="Upload Files"
+                [multiple]="true"
+                [showUploadButton]="false"
+                [showCancelButton]="false">
+            </p-fileupload>
+            <div class="text-center text-sm mt-4 text-gray-500">
+                <p>You can upload multiple files related to this appointment.</p>
+                <p>Example: Prescription, Test Results, Medical Reports, etc.</p>
+                <p>Accepted file types: Any file type (Max size: 10MB per file)</p>
+            </div>
+            <div *ngIf="uploadedFiles.length > 0" class="mt-4">
+                <h4 class="text-sm text-gray-500 mb-2">Selected Files ({{ uploadedFiles.length }}):</h4>
+                <div class="space-y-2">
+                    <div *ngFor="let file of uploadedFiles; let i = index" class="flex items-center justify-between p-2 rounded">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm text-gray-600">{{ file.name }}</span>
+                            <span class="text-xs text-gray-500">({{ formatFileSize(file.size) }})</span>
+                        </div>
+                        <button 
+                            type="button" 
+                            (click)="removeFile(i)" 
+                            class="text-red-500 hover:text-red-700 text-sm">
+                            <i class="pi pi-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6">
+            <p-button type="submit" label="Submit" severity="primary" icon="fa-solid fa-check" iconPos="right" fluid (click)="onSubmit()" />
+        </div>
+
+    </form>
+</div>
