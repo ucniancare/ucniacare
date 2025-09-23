@@ -43,7 +43,7 @@
 </div>
 <div *ngIf="selectedState === 'manual'">
     <div class="mt-4">
-        <form [formGroup]="addUserForm">
+        <form [formGroup]="addUserForm" (ngSubmit)="addUser()">
             <p-floatlabel variant="on" class="mt-4">
                 <p-inputnumber formControlName="ucIdNumber" mode="decimal" inputId="withoutgrouping" [useGrouping]="false" fluid/>
                 <label for="idNumber">UC ID Number</label>

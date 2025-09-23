@@ -13,7 +13,7 @@ import { UserAccountModel } from '../shared-models/user-account.model';
 import { UserModel } from '../shared-models/user.model';
 import { COLLECTION } from '../constants/firebase-collection.constants';
 import { MessageService } from 'primeng/api';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of, tap } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { PasswordUtil } from '../shared-utils/password-util';
@@ -24,6 +24,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { UserService } from '../shared-services/user.service';
 interface SexOption {
     name: string;
 }
@@ -126,7 +127,8 @@ export class AddUserComponent {
     constructor(
         private firebaseService: FirebaseService,
         private dataSecurityService: DataSecurityService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private userService: UserService
     ) {}
 
     ngOnInit() {
@@ -146,7 +148,7 @@ export class AddUserComponent {
             this.processExcelFile(event.files[0]);
         }
     }
-
+    // This is for the import excel file
     private processExcelFile(file: File): void {
         this.isProcessing = true;
         this.processingProgress = 0;
@@ -411,7 +413,7 @@ export class AddUserComponent {
                     return dateValue;
                 }
             }
-            
+    
             return null;
         } catch (error) {
             return null;
@@ -482,6 +484,47 @@ export class AddUserComponent {
 
     protected downloadExcelTemplate(): void {
         window.location.href = APPCONSTS.ADD_USER_EXCEL_TEMPLATE_URL;
+    }
+
+    protected addUser(): void {
+        const addUserFormValue = this.addUserForm.value;
+        const user: User = {
+            userAccountId: addUserFormValue.ucIdNumber !,
+            firstName: addUserFormValue.firstName!,
+            middleName: addUserFormValue.middleName!,
+            lastName: addUserFormValue.lastName!,
+            extName: addUserFormValue.extName!,
+            sex: addUserFormValue.sex !,
+            email: addUserFormValue.email !,
+            phoneNumber: addUserFormValue.phoneNumber !,
+            dateOfBirth: addUserFormValue.dateOfBirth !,
+            maritalStatus: addUserFormValue.maritalStatus!,
+            userRoles: addUserFormValue.userRoles !,
+            metaData: {
+                createdAt: new Date(),
+                createdBy: this.userService.getCurrentUser()?.id?? 'system',
+                updatedAt: new Date(),
+                updatedBy: this.userService.getCurrentUser()?.id?? 'system'
+            } 
+        }
+        this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user).pipe(
+            tap(() => this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'User added successfully',
+                life: 5000
+            })),
+            catchError(error => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Error adding user: ' + error.message,
+                    life: 5000
+                });
+                return of(null);
+            })
+        ).subscribe();
+        this.addUserForm.reset();
     }
 
 }

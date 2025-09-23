@@ -14,8 +14,17 @@ export const COLLECTION = {
         FIELDS: {
             USERACCOUNTID: 'userAccountId',
             FIRSTNAME: 'firstName',
+            MIDDLENAME: 'middleName',
             LASTNAME: 'lastName',
+            EXTNAME: 'extName',
+            SEX: 'sex',
             EMAIL: 'email',
+            PHONENUMBER: 'phoneNumber',
+            DATEOFBIRTH: 'dateOfBirth',
+            MARITALSTATUS: 'maritalStatus',
+            USERROLES: 'userRoles',
+            PROFILEPICTURE: 'profilePicture',
+            METADATA: 'metaData',
         },
     },
     GOOGLE_TOKEN: {

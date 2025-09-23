@@ -34,22 +34,22 @@ export class TeamComponent implements OnInit {
         this.teamMembers.set([
             {
                 name: 'Nancy Romales',
-                image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-                role: 'Database Designer'
+                image: 'ucniacare/assets/team-images/database_manager.jpg',
+                role: 'Database Manager'
             },
             {
                 name: 'Aeron Evan Lugay',
-                image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+                image: 'ucniacare/assets/team-images/project_manager.jpg',
                 role: 'Project Manager'
             },
             {
                 name: 'Clifford Alferez',
-                image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+                image: 'ucniacare/assets/team-images/programmer.jpg',
                 role: 'Lead Developer'
             },
             {
                 name: 'John Paul Loayan',
-                image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+                image: 'ucniacare/assets/team-images/designer.jpg',
                 role: 'UI/UX Designer'
             }
         ]);
