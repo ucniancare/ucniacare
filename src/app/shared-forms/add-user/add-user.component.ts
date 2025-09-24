@@ -135,7 +135,6 @@ export class AddUserComponent {
     }
 
     onBasicUploadAuto(event: any) {
-        console.log('uploaded file: ', event);
         if (event.files && event.files.length > 0) {
             this.processExcelFile(event.files[0]);
         }

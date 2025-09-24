@@ -207,7 +207,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
             this.fileUploadService.uploadFile(this.uploadedFiles[0], GOOGLEDRIVEFOLDERCONSTS.PROFILEPICTURE, true).pipe(
                 switchMap(file => {
-                    console.log('File uploaded successfully:', file);
                     return this.firebaseService.updateData$<User>(
                         COLLECTION.USERS.COLLECTIONNAME, 
                         this.user!.id!,
@@ -272,7 +271,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
     
         this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user, UserModel.toJson, UserModel.fromJson).pipe(
-            tap(user => console.log('user added: ', user)),
             catchError(err => {
                 return of(null);
             })
