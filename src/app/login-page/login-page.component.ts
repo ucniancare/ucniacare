@@ -210,7 +210,6 @@ export class LoginPageComponent implements OnInit{
             tap(users => {
                 if (users && users.length > 0) {
                     // Email exists, proceed to send OTP
-                    this.spinnerOverlayService.show('Sending OTP...');
                     
                     const data: OTPTemplateForm = OTPUtil.generateOTP(this.forgotPasswordForm.get('email')?.value || '');
                     this.userAuthService.sendOTP(data).pipe(

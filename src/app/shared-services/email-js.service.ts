@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import emailjs, { type EmailJSResponseStatus } from '@emailjs/browser';
 import { Observable } from 'rxjs';
 
-
 export enum sendEmailType {
     OTP = 'template_jmyzhjo',
     ACCOUNT_DETAILS = 'template_snme66g'

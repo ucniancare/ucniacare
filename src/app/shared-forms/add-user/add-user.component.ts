@@ -13,7 +13,7 @@ import { UserAccountModel } from '../../shared-models/user-account.model';
 import { UserModel } from '../../shared-models/user.model';
 import { COLLECTION } from '../../constants/firebase-collection.constants';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { catchError, forkJoin, of, tap , concatMap, finalize } from 'rxjs';
+import { catchError, forkJoin, of, tap, concatMap, finalize, map } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { PasswordUtil } from '../../shared-utils/password-util';
@@ -28,7 +28,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { UserService } from '../../shared-services/user.service';   
 import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
 import { Config } from '@angular/fire/auth';
-import { EmailJsService, sendEmailType } from '../../shared-services/email-js.service';
+import { EmailJsService, sendEmailType, sendEmailData } from '../../shared-services/email-js.service';
 import { AccountDetailsTemplateForm } from '../../shared-interfaces/email-template-form';
 import { DropdownOption } from '../../shared-interfaces/dropdown-option';
 
@@ -298,110 +298,115 @@ export class AddUserComponent {
         return userData;
     }
 
-    private async createUserAccountAndUser(userData: any): Promise<any> {
-        try {
-            const generatedPassword = PasswordUtil.generatePassword(8);
-            const encryptedPassword = this.dataSecurityService.encryptData(generatedPassword);
-            
-            const userAccount: UserAccount = {
-                ucIdNumber: userData.ucIdNumber,
-                password: encryptedPassword,
-                isLoggedIn: false,
-                isFirstLogin: true,
-                metaData: {
-                    createdAt: new Date(),
-                    createdBy: APPCONSTS.SYSTEM,
-                    updatedAt: new Date(),
-                    updatedBy: APPCONSTS.SYSTEM
+    private createUserAccountAndUser(userData: any): Promise<any> {
+        const generatedPassword = PasswordUtil.generatePassword(8);
+        const encryptedPassword = this.dataSecurityService.encryptData(generatedPassword);
+        
+        const userAccount = this.createUserAccountObject(userData, encryptedPassword);
+        
+        return this.firebaseService.addData$(
+            COLLECTION.USERACCOUNTS.COLLECTIONNAME,
+            userAccount,
+            UserAccountModel.toJsonPartial,
+            UserAccountModel.fromJson
+        ).pipe(
+            concatMap(createdUserAccount => {
+                if (!createdUserAccount?.id) {
+                    throw new Error('Failed to create UserAccount');
                 }
-            };
-            
-            Object.keys(userAccount).forEach(key => {
-                if (userAccount[key as keyof UserAccount] === undefined) {
-                    delete userAccount[key as keyof UserAccount];
-                }
-            });
+                
+                const user = this.createUserObject(userData, createdUserAccount.id);
+                
+                return this.firebaseService.addData$(
+                    COLLECTION.USERS.COLLECTIONNAME,
+                    user,
+                    UserModel.toJsonPartial,
+                    UserModel.fromJson
+                ).pipe(
+                    tap(() => this.sendAccountDetailsEmail(userData, generatedPassword)),
+                    map(() => ({
+                        completeName: StringUtil.buildCompleteName(
+                            user.firstName!, 
+                            user.middleName, 
+                            user.lastName!, 
+                            user.extName
+                        ),
+                        ucIdNumber: userData.ucIdNumber,
+                        password: generatedPassword,
+                        email: userData.email
+                    }))
+                );
+            }),
+            catchError(error => {
+                console.error('Error creating user:', error);
+                throw error;
+            })
+        ).toPromise();
+    }
 
-            const createdUserAccount = await this.firebaseService.addData$(
-                COLLECTION.USERACCOUNTS.COLLECTIONNAME,
-                userAccount,
-                UserAccountModel.toJsonPartial,
-                UserAccountModel.fromJson
-            ).toPromise();
-
-            if (!createdUserAccount?.id) {
-                throw new Error('Failed to create UserAccount');
+    private createUserAccountObject(userData: any, encryptedPassword: string): UserAccount {
+        return {
+            ucIdNumber: userData.ucIdNumber,
+            password: encryptedPassword,
+            isLoggedIn: false,
+            isFirstLogin: true,
+            metaData: {
+                createdAt: new Date(),
+                createdBy: APPCONSTS.SYSTEM,
+                updatedAt: new Date(),
+                updatedBy: APPCONSTS.SYSTEM
             }
+        };
+    }
 
-            const user: User = {
-                userAccountId: createdUserAccount.id,
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                email: userData.email,
-                metaData: {
-                    createdAt: new Date(),
-                    createdBy: APPCONSTS.SYSTEM,
-                    updatedAt: new Date(),
-                    updatedBy: APPCONSTS.SYSTEM
-                }
-            };
-            
-            if (userData.middleName) user.middleName = userData.middleName;
-            if (userData.extName) user.extName = userData.extName;
-            if (userData.sex) user.sex = userData.sex;
-            if (userData.phoneNumber) user.phoneNumber = userData.phoneNumber;
-            if (userData.dateOfBirth) user.dateOfBirth = userData.dateOfBirth;
-            if (userData.maritalStatus) user.maritalStatus = userData.maritalStatus;
-            if (userData.userRoles && userData.userRoles.length > 0) user.userRoles = userData.userRoles;
-            
-            user.profilePicture = '';
-            
-            Object.keys(user).forEach(key => {
-                if (user[key as keyof User] === undefined) {
-                    delete user[key as keyof User];
-                }
-            });
+    private createUserObject(userData: any, userAccountId: string): User {
+        const user: User = {
+            userAccountId,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            email: userData.email,
+            profilePicture: '',
+            metaData: {
+                createdAt: new Date(),
+                createdBy: APPCONSTS.SYSTEM,
+                updatedAt: new Date(),
+                updatedBy: APPCONSTS.SYSTEM
+            }
+        };
 
-            await this.firebaseService.addData$(
-                COLLECTION.USERS.COLLECTIONNAME,
-                user,
-                UserModel.toJsonPartial,
-                UserModel.fromJson
-            ).toPromise();
+        // Add optional fields only if they exist
+        if (userData.middleName) user.middleName = userData.middleName;
+        if (userData.extName) user.extName = userData.extName;
+        if (userData.sex) user.sex = userData.sex;
+        if (userData.phoneNumber) user.phoneNumber = userData.phoneNumber;
+        if (userData.dateOfBirth) user.dateOfBirth = userData.dateOfBirth;
+        if (userData.maritalStatus) user.maritalStatus = userData.maritalStatus;
+        if (userData.userRoles?.length > 0) user.userRoles = userData.userRoles;
 
-            console.log(`Successfully created user: ${userData.firstName} ${userData.lastName} with password: ${generatedPassword}`);
-            
-            // Send email with account details
-            const completeName = StringUtil.buildCompleteName(user.firstName!, user.middleName, user.lastName!, user.extName);
-            const emailData: AccountDetailsTemplateForm = {
-                email: userData.email,
-                name: completeName,
-                ucIdNumber: userData.ucIdNumber,
-                password: generatedPassword
-            };
-            
-            this.emailJsService.sendEmail({
-                data: emailData,
-                type: sendEmailType.ACCOUNT_DETAILS
-            }).subscribe(emailSent => {
-                if (emailSent) {
-                    console.log(`Account details email sent successfully to: ${userData.email}`);
-                } else {
-                    console.warn(`Failed to send account details email to: ${userData.email}`);
-                }
-            });
-            
-            return {
-                completeName: completeName,
-                ucIdNumber: userData.ucIdNumber,
-                password: generatedPassword,
-                email: userData.email
-            };
-            
-        } catch (error) {
-            console.error('Error creating user:', error);
-            throw error;
-        }
+        return user;
+    }
+
+    private sendAccountDetailsEmail(userData: any, generatedPassword: string): void {
+        const completeName = StringUtil.buildCompleteName(
+            userData.firstName, 
+            userData.middleName, 
+            userData.lastName, 
+            userData.extName
+        );
+        
+        const emailData: AccountDetailsTemplateForm = {
+            email: userData.email,
+            name: completeName,
+            ucIdNumber: userData.ucIdNumber,
+            password: generatedPassword
+        };
+        
+        const sendEmailData: sendEmailData = {
+            data: emailData,
+            type: sendEmailType.ACCOUNT_DETAILS
+        };
+        
+        this.emailJsService.sendEmail(sendEmailData).subscribe();
     }
 
     private parseDateFromExcel(value: string): Date | null {
@@ -536,9 +541,9 @@ export class AddUserComponent {
                     }
                     return this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user)
                 }),
-                tap(success => {
+                concatMap((success) => {
                     if (success) {
-                        this.spinnerOverlayService.hide();
+                        this.spinnerOverlayService.show('Sending Email...');
                         const completeName = StringUtil.buildCompleteName(
                             addUserFormValue.firstName!, 
                             addUserFormValue.middleName || undefined, 
@@ -553,38 +558,40 @@ export class AddUserComponent {
                             password: password
                         };
                         
-                        this.emailJsService.sendEmail({
+                        const sendEmailData: sendEmailData = {
                             data: emailData,
                             type: sendEmailType.ACCOUNT_DETAILS
-                        }).subscribe(emailSent => {
-                            const message = emailSent 
-                                ? 'User added successfully. Account details have been sent to the user\'s email.'
-                                : 'User added successfully. However, there was an issue sending the account details email.';
-                            
-                            this.confirmationService.confirm({
-                                target: event?.target as EventTarget,
-                                message: message,
-                                header: 'Success',
-                                icon: 'pi pi-check',
-                                rejectVisible: false,
-                                acceptButtonProps: {
-                                    label: 'OK',
-                                    severity: 'primary',
-                                    size: 'small',
-                                },
-                    
-                                accept: () => {
-                                    this.addUserForm.reset();
-                                },
-                                reject: () => {
-                                    this.addUserForm.reset();
-                                },
-                            });
-                        });
+                        };
+                        return this.emailJsService.sendEmail(sendEmailData);
                     }
                     else {
                         throw new Error('Error adding user');
                     }
+                }),
+                tap(emailSent => {
+                    const message = emailSent 
+                        ? 'User added successfully. Account details have been sent to the user\'s email.'
+                        : 'User added successfully. However, there was an issue sending the account details email.';
+                    
+                    this.confirmationService.confirm({
+                        target: event?.target as EventTarget,
+                        message: message,
+                        header: 'Success',
+                        icon: 'pi pi-check',
+                        rejectVisible: false,
+                        acceptButtonProps: {
+                            label: 'OK',
+                            severity: 'primary',
+                            size: 'small',
+                        },
+            
+                        accept: () => {
+                            this.addUserForm.reset();
+                        },
+                        reject: () => {
+                            this.addUserForm.reset();
+                        },
+                    });
                 }),
                 catchError(error => {
                     this.addUserForm.reset();
