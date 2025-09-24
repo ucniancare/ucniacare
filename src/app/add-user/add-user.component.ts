@@ -5,29 +5,39 @@ import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
 import { CommonModule } from '@angular/common';
 import { DividerModule } from 'primeng/divider';
 import * as XLSX from 'xlsx';
-import { FirebaseService } from '../../shared-services/firebase.service';
-import { DataSecurityService } from '../../shared-services/data-security.service';
-import { UserAccount } from '../../shared-interfaces/user-account';
-import { User } from '../../shared-interfaces/user';
-import { UserAccountModel } from '../../shared-models/user-account.model';
-import { UserModel } from '../../shared-models/user.model';
-import { COLLECTION } from '../../constants/firebase-collection.constants';
+import { FirebaseService } from '../shared-services/firebase.service';
+import { DataSecurityService } from '../shared-services/data-security.service';
+import { UserAccount } from '../shared-interfaces/user-account';
+import { User } from '../shared-interfaces/user';
+import { UserAccountModel } from '../shared-models/user-account.model';
+import { UserModel } from '../shared-models/user.model';
+import { COLLECTION } from '../constants/firebase-collection.constants';
 import { MessageService } from 'primeng/api';
-import { catchError, forkJoin, of, tap , concatMap, finalize } from 'rxjs';
+import { catchError, forkJoin, of, tap } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
-import { PasswordUtil } from '../../shared-utils/password-util';
-import { APPCONSTS } from '../../constants/data.constants';
+import { PasswordUtil } from '../shared-utils/password-util';
+import { APPCONSTS } from '../constants/data.constants';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { UserService } from '../../shared-services/user.service';   
-import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
+import { UserService } from '../shared-services/user.service';
+interface SexOption {
+    name: string;
+}
 
-interface DropdownOption {
+interface MaritalStatusOption {
+    name: string;
+}
+
+interface ExtNameOption {
+    name: string;
+}
+
+interface UserRoleOption {
     name: string;
 }
 
@@ -53,12 +63,12 @@ interface DropdownOption {
         MultiSelectModule
     ],
     templateUrl: './add-user.component.html',
-    styleUrl: './add-user.component.css',
+    // styleUrl: './add-user.component.css',
     standalone: true
 })
 export class AddUserComponent {
 
-    protected userRoleOptions: DropdownOption[] = [
+    protected userRoleOptions: UserRoleOption[] = [
         { name: 'Super Admin' },
         { name: 'Admin' },
         { name: 'Doctor' },
@@ -67,17 +77,17 @@ export class AddUserComponent {
         { name: 'Staff' }
     ];
 
-    protected sexOptions: DropdownOption[] = [
+    protected sexOptions: SexOption[] = [
         { name: 'Male' },
         { name: 'Female' }
     ];
-    protected maritalStatusOptions: DropdownOption[] = [
+    protected maritalStatusOptions: MaritalStatusOption[] = [
         { name: 'Single' },
         { name: 'Married' },
         { name: 'Divorced' },
         { name: 'Widowed' }
     ];
-    protected extNameOptions: DropdownOption[] = [
+    protected extNameOptions: ExtNameOption[] = [
         { name: 'Jr.' },
         { name: 'Sr.' },
         { name: 'II' },
@@ -86,9 +96,9 @@ export class AddUserComponent {
         { name: 'V' },
         { name: 'Not Applicable' }
     ];
-    protected selectedSex: DropdownOption = this.sexOptions[0];
-    protected selectedMaritalStatus: DropdownOption = this.maritalStatusOptions[0];
-    protected selectedExtName: DropdownOption = this.extNameOptions[0];
+    protected selectedSex: SexOption = this.sexOptions[0];
+    protected selectedMaritalStatus: MaritalStatusOption = this.maritalStatusOptions[0];
+    protected selectedExtName: ExtNameOption = this.extNameOptions[0];
 
     protected stateOptions: any[] = [
         { label: 'Manual', value: 'manual' },
@@ -118,8 +128,7 @@ export class AddUserComponent {
         private firebaseService: FirebaseService,
         private dataSecurityService: DataSecurityService,
         private messageService: MessageService,
-        private userService: UserService,
-        private spinnerOverlayService: SpinnerOverlayService
+        private userService: UserService
     ) {}
 
     ngOnInit() {
@@ -477,72 +486,14 @@ export class AddUserComponent {
         window.location.href = APPCONSTS.ADD_USER_EXCEL_TEMPLATE_URL;
     }
 
-    protected addUser(): void {
-        const addUserFormValue = this.addUserForm.value;
-        const password = PasswordUtil.generatePassword(8);
-        console.log('password: ', password);
+    // protected addUser(): void {
+    //     const addUserFormValue = this.addUserForm.value;
+    //     console.log('test')
+    // }
 
-        const encryptedPassword = this.dataSecurityService.encryptData(password);
-        const userAccount: UserAccount = {
-            ucIdNumber: addUserFormValue.ucIdNumber!,
-            password: encryptedPassword,
-            isLoggedIn: false,
-            isFirstLogin: false,
-            metaData: {
-                createdAt: new Date(),
-                createdBy: APPCONSTS.SYSTEM,
-                updatedAt: new Date(),
-                updatedBy: APPCONSTS.SYSTEM
-            }
-        }
-        this.spinnerOverlayService.show('Adding user...');
-        this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount).pipe(
-            concatMap((createdUserAccount) => {
-                const user: User = {
-                    userAccountId: createdUserAccount.id,
-                    firstName: addUserFormValue.firstName!,
-                    middleName: addUserFormValue.middleName!,
-                    lastName: addUserFormValue.lastName!,
-                    extName: addUserFormValue.extName!,
-                    sex: addUserFormValue.sex!,
-                    email: addUserFormValue.email!,
-                    phoneNumber: addUserFormValue.phoneNumber!,
-                    dateOfBirth: addUserFormValue.dateOfBirth!,
-                    maritalStatus: addUserFormValue.maritalStatus!,
-                    userRoles: addUserFormValue.userRoles!,
-                    metaData: {
-                        createdAt: new Date(),
-                        createdBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM,
-                        updatedAt: new Date(),
-                        updatedBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM
-                    }
-                }
-                return this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user)
-            }),
-            tap( user => {
-                this.spinnerOverlayService.show('Adding user...');
-                console.log('user: ', user);
-                this.messageService.add({
-                  severity: 'success',
-                  summary: 'Success',
-                  detail: 'User added successfully',
-                  life: 5000
-                });
-              }),              
-            catchError(error => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Error adding user: ' + error.message,
-                    life: 5000
-                });
-                return of(null);
-            }),
-            finalize(() => {
-                this.spinnerOverlayService.hide();
-                this.addUserForm.reset();
-            })
-        ).subscribe();
+    protected test(): void {
+        console.log('test');
     }
+
 
 }

@@ -126,8 +126,8 @@ export class LoginPageComponent implements OnInit{
     public addUserForTesting(): void {
         // const password = '123';
         // const userAccount: UserAccount = {
-        //     ucIdNumber: 'admin',
-        //     password: this.dataSecurityService.encrypData(password),
+        //     ucIdNumber: '123',
+        //     password: this.dataSecurityService.encryptData(password),
         //     isLoggedIn: false,
         //     lastLogin: new Date(),
         //     metaData: {
@@ -138,7 +138,7 @@ export class LoginPageComponent implements OnInit{
         //     }
         // }
 
-        // this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount, UserAccountModel.toJson, UserAccountModel.fromJson).pipe(
+        // this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount).pipe(
         //     tap(user => console.log('user added: ', user)),
         //     catchError(err => {
         //         return of(null);
@@ -146,6 +146,40 @@ export class LoginPageComponent implements OnInit{
         // ).subscribe();
 
     }
+
+    // public addUser() {
+    //     const user: User = {
+    //         userAccountId: this.userService.currentUserAccount()?.id,
+    //         firstName: 'Super',
+    //         lastName: 'Admin',
+    //         middleName: '',
+    //         extName: '',
+    //         sex: 'Male',
+    //         email: 'super@admin.com',
+    //         phoneNumber: '09997527570',
+    //         dateOfBirth: new Date(),
+    //         maritalStatus: 'Single',
+    //         userRoles: ['admin'],
+    //         profilePicture: '',
+    //         metaData: {
+    //             createdAt: new Date(),
+    //             createdBy: '123123123',
+    //             updatedAt: new Date(),
+    //             updatedBy: '123123123'
+    //         }
+    //     }
+    
+    //     this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user, UserModel.toJson, UserModel.fromJson).pipe(
+    //         tap(user => console.log('user added: ', user)),
+    //         catchError(err => {
+    //             return of(null);
+    //         })
+    //     ).subscribe();
+    // }
+
+
+    
+
 
     protected setForgotPasswordState(): void {
         this.pageState.set('forgotPassword');
