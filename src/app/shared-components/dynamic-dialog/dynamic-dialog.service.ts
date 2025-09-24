@@ -4,6 +4,7 @@ import { DynamicDialogComponent } from './dynamic-dialog.component';
 export interface DynamicDialogData {
     component: Type<any>;
     title: string;
+    width?: string;
 }
 
 @Injectable({ providedIn: 'root' })

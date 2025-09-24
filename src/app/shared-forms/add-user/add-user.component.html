@@ -43,15 +43,21 @@
 </div>
 <div *ngIf="selectedState === 'manual'">
     <div class="mt-4">
-        <form [formGroup]="addUserForm" (ngSubmit)="addUser()">
+        <form [formGroup]="addUserForm">
             <p-floatlabel variant="on" class="mt-4">
                 <p-inputnumber formControlName="ucIdNumber" mode="decimal" inputId="withoutgrouping" [useGrouping]="false" fluid/>
                 <label for="idNumber">UC ID Number</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('ucIdNumber')?.invalid && addUserForm.get('ucIdNumber')?.touched" class="text-red-500 text-sm mt-1">
+                UC ID Number is required
+            </div>
             <p-floatlabel variant="on" class="mt-4">
                 <input pInputText id="firstName" formControlName="firstName" autocomplete="off" fluid />
                 <label for="firstName">First Name</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('firstName')?.invalid && addUserForm.get('firstName')?.touched" class="text-red-500 text-sm mt-1">
+                First Name is required
+            </div>
             <p-floatlabel variant="on" class="mt-4">
                 <input pInputText id="middleName" formControlName="middleName" autocomplete="off" fluid />
                 <label for="middleName">Middle Name</label>
@@ -60,36 +66,57 @@
                 <input pInputText id="lastName" formControlName="lastName" autocomplete="off" fluid />
                 <label for="lastName">Last Name</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('lastName')?.invalid && addUserForm.get('lastName')?.touched" class="text-red-500 text-sm mt-1">
+                Last Name is required
+            </div>
             <p-floatlabel variant="on" class="mt-4">
-                <p-select formControlName="extName" inputId="extName" [options]="extNameOptions" optionLabel="name" fluid />
+                <p-select formControlName="extName" inputId="extName" [options]="extNameOptions" optionLabel="name" appendTo="body" fluid />
                 <label for="extName">Extension Name</label>
             </p-floatlabel>
             <p-floatlabel variant="on" class="mt-4">
-                <p-select formControlName="sex" inputId="sex" [options]="sexOptions" optionLabel="name" fluid />
+                <p-select formControlName="sex" inputId="sex" [options]="sexOptions" optionLabel="name" appendTo="body" fluid />
                 <label for="sex">Sex</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('sex')?.invalid && addUserForm.get('sex')?.touched" class="text-red-500 text-sm mt-1">
+                Sex is required
+            </div>
             <p-floatlabel variant="on" class="mt-4">
-                <input pInputText id="email" formControlName="email" autocomplete="off" fluid />
+                <input pInputText id="email" formControlName="email" autocomplete="off" appendTo="body" fluid />
                 <label for="email">Email</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('email')?.value === '' && addUserForm.get('email')?.touched" class="text-red-500 text-sm mt-1">
+                Email is required
+            </div>
+            <div *ngIf="addUserForm.get('email')?.errors?.['email'] && addUserForm.get('email')?.touched" class="text-red-500 text-sm mt-1">
+                Please enter a valid email address
+            </div>
             <p-floatlabel variant="on" class="mt-4">
                 <input pInputText id="phoneNumber" formControlName="phoneNumber" autocomplete="off" fluid />
                 <label for="phoneNumber">Phone Number</label>
             </p-floatlabel>
             <p-floatlabel variant="on" class="mt-4">
-                <p-datepicker formControlName="dateOfBirth" inputId="dateOfBirth" showIcon iconDisplay="input" fluid />
+                <p-datepicker formControlName="dateOfBirth" inputId="dateOfBirth" showIcon iconDisplay="input" appendTo="body" fluid />
                 <label for="dateOfBirth">Date of Birth</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('dateOfBirth')?.invalid && addUserForm.get('dateOfBirth')?.touched" class="text-red-500 text-sm mt-1">
+                Date of Birth is required
+            </div>
             <p-floatlabel variant="on" class="mt-4">
-                <p-select formControlName="maritalStatus" inputId="maritalStatus" [options]="maritalStatusOptions" optionLabel="name" fluid />
+                <p-select formControlName="maritalStatus" inputId="maritalStatus" [options]="maritalStatusOptions" optionLabel="name" appendTo="body" fluid />
                 <label for="maritalStatus">Marital Status</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('maritalStatus')?.invalid && addUserForm.get('maritalStatus')?.touched" class="text-red-500 text-sm mt-1">
+                Marital Status is required
+            </div>
             <p-floatlabel variant="on" class="mt-4">
-                <p-multiselect formControlName="userRoles" [options]="userRoleOptions" inputId="userRoles" optionLabel="name" display="chip" fluid/>
+                <p-multiselect formControlName="userRoles" [options]="userRoleOptions" inputId="userRoles" optionLabel="name" display="chip" appendTo="body" fluid/>
                 <label for="userRoles">User Roles</label>
             </p-floatlabel>
+            <div *ngIf="addUserForm.get('userRoles')?.invalid && addUserForm.get('userRoles')?.touched" class="text-red-500 text-sm mt-1">
+                User Roles is required
+            </div>
             <div class="mt-4">
-                <p-button type="submit" label="Add User" icon="fa-solid fa-user-plus" fluid/>
+                <p-button (click)="addUser()" label="Add User" icon="fa-solid fa-user-plus" fluid/>
             </div>
 
         </form>

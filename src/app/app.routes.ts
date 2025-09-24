@@ -45,7 +45,7 @@ export const routes: Routes = [
             sideBarMenu: true, 
             topToolbar: true 
         },
-        canActivate: [AuthGuard]
+        //canActivate: [AuthGuard]
     },
     {
         path: 'home',
@@ -80,6 +80,14 @@ export const routes: Routes = [
         },
         canActivate: [ChangePasswordGuard]
     },
+    // {
+    //     path: 'add-user',
+    //     component: AddUserComponent,
+    //     data: { 
+    //         sideBarMenu: false, 
+    //         topToolbar: false 
+    //     },
+    // },
     { path: '**', redirectTo: '/ucniacare' }
 
 ];

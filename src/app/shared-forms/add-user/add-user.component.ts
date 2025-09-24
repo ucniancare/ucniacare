@@ -12,7 +12,7 @@ import { User } from '../../shared-interfaces/user';
 import { UserAccountModel } from '../../shared-models/user-account.model';
 import { UserModel } from '../../shared-models/user.model';
 import { COLLECTION } from '../../constants/firebase-collection.constants';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { catchError, forkJoin, of, tap , concatMap, finalize } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
@@ -26,6 +26,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { UserService } from '../../shared-services/user.service';   
 import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
+import { Config } from '@angular/fire/auth';
 
 interface DropdownOption {
     name: string;
@@ -119,7 +120,8 @@ export class AddUserComponent {
         private dataSecurityService: DataSecurityService,
         private messageService: MessageService,
         private userService: UserService,
-        private spinnerOverlayService: SpinnerOverlayService
+        private spinnerOverlayService: SpinnerOverlayService,
+        private confirmationService: ConfirmationService
     ) {}
 
     ngOnInit() {
@@ -478,71 +480,97 @@ export class AddUserComponent {
     }
 
     protected addUser(): void {
-        const addUserFormValue = this.addUserForm.value;
-        const password = PasswordUtil.generatePassword(8);
-        console.log('password: ', password);
 
-        const encryptedPassword = this.dataSecurityService.encryptData(password);
-        const userAccount: UserAccount = {
-            ucIdNumber: addUserFormValue.ucIdNumber!,
-            password: encryptedPassword,
-            isLoggedIn: false,
-            isFirstLogin: false,
-            metaData: {
-                createdAt: new Date(),
-                createdBy: APPCONSTS.SYSTEM,
-                updatedAt: new Date(),
-                updatedBy: APPCONSTS.SYSTEM
-            }
-        }
-        this.spinnerOverlayService.show('Adding user...');
-        this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount).pipe(
-            concatMap((createdUserAccount) => {
-                const user: User = {
-                    userAccountId: createdUserAccount.id,
-                    firstName: addUserFormValue.firstName!,
-                    middleName: addUserFormValue.middleName!,
-                    lastName: addUserFormValue.lastName!,
-                    extName: addUserFormValue.extName!,
-                    sex: addUserFormValue.sex!,
-                    email: addUserFormValue.email!,
-                    phoneNumber: addUserFormValue.phoneNumber!,
-                    dateOfBirth: addUserFormValue.dateOfBirth!,
-                    maritalStatus: addUserFormValue.maritalStatus!,
-                    userRoles: addUserFormValue.userRoles!,
-                    metaData: {
-                        createdAt: new Date(),
-                        createdBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM,
-                        updatedAt: new Date(),
-                        updatedBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM
-                    }
+        if (this.addUserForm.valid) {
+            this.spinnerOverlayService.show('Creating user...');
+            const addUserFormValue = this.addUserForm.value;
+            const password = PasswordUtil.generatePassword(8);
+            const encryptedPassword = this.dataSecurityService.encryptData(password);
+            const userAccount: UserAccount = {
+                ucIdNumber: String(addUserFormValue.ucIdNumber!),
+                password: encryptedPassword,
+                isLoggedIn: false,
+                isFirstLogin: true,
+                lastLogin: new Date(),
+                metaData: {
+                    createdAt: new Date(),
+                    createdBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM,
+                    updatedAt: new Date(),
+                    updatedBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM
                 }
-                return this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user)
-            }),
-            tap( user => {
-                this.spinnerOverlayService.show('Adding user...');
-                console.log('user: ', user);
-                this.messageService.add({
-                  severity: 'success',
-                  summary: 'Success',
-                  detail: 'User added successfully',
-                  life: 5000
-                });
-              }),              
-            catchError(error => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Error adding user: ' + error.message,
-                    life: 5000
-                });
-                return of(null);
-            }),
-            finalize(() => {
-                this.spinnerOverlayService.hide();
-                this.addUserForm.reset();
-            })
-        ).subscribe();
+            }
+            this.firebaseService.addData$<UserAccount>(COLLECTION.USERACCOUNTS.COLLECTIONNAME, userAccount).pipe(
+
+                concatMap((createdUserAccount) => {
+                    const user: User = {
+                        userAccountId: createdUserAccount.id,
+                        firstName: addUserFormValue.firstName!,
+                        middleName: addUserFormValue.middleName!,
+                        lastName: addUserFormValue.lastName!,
+                        extName: addUserFormValue.extName!,
+                        sex: addUserFormValue.sex!,
+                        email: addUserFormValue.email!,
+                        phoneNumber: addUserFormValue.phoneNumber!,
+                        dateOfBirth: addUserFormValue.dateOfBirth!,
+                        maritalStatus: addUserFormValue.maritalStatus!,
+                        userRoles: addUserFormValue.userRoles!,
+                        metaData: {
+                            createdAt: new Date(),
+                            createdBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM,
+                            updatedAt: new Date(),
+                            updatedBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM
+                        }
+                    }
+                    return this.firebaseService.addData$<User>(COLLECTION.USERS.COLLECTIONNAME, user)
+                }),
+                tap(success => {
+                    if (success) {
+                        this.spinnerOverlayService.hide();
+                        this.confirmationService.confirm({
+                            target: event?.target as EventTarget,
+                            message: 'User added successfully. A temporary password has been sent to the user\'s email.',
+                            header: 'Success',
+                            icon: 'pi pi-check',
+                            rejectVisible: false,
+                            acceptButtonProps: {
+                                label: 'OK',
+                                severity: 'primary',
+                                size: 'small',
+                            },
+                
+                            accept: () => {
+                                this.addUserForm.reset();
+
+                            },
+                            reject: () => {
+                                this.addUserForm.reset();
+                            },
+                        });
+                    }
+                    else {
+                        throw new Error('Error adding user');
+                    }
+                }),
+                catchError(error => {
+                    this.addUserForm.reset();
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Error adding user: ' + error.message,
+                        life: 5000
+                    });
+                    return of(null);
+                }),
+                finalize(() => {
+                    this.spinnerOverlayService.hide();
+                    
+                })
+            ).subscribe();
+        } 
+        else {
+            this.addUserForm.markAllAsTouched();
+        }
+
     }
 
 }

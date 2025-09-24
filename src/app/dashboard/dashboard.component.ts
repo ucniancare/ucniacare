@@ -282,7 +282,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     openDialog() {
         const dynamicDialogData: DynamicDialogData = {
             component: AddUserComponent,
-            title: 'Add User'
+            title: 'Add User',
+            width: '34rem'
         }
         this.dynamicDialogService.open(dynamicDialogData);
     }

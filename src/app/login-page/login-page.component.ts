@@ -90,7 +90,7 @@ export class LoginPageComponent implements OnInit{
         this.progressBarOverlayService.show();
         this.loginErrorMessage.set(''); // Clear previous errors
         
-        this.userAuthService.loginUser(this.loginForm.get('idNumber')?.value || '', this.loginForm.get('password')?.value || '').pipe(
+        this.userAuthService.loginUser(this.loginForm.get('idNumber')?.value?.toString() || '', this.loginForm.get('password')?.value?.toString() || '').pipe(
             tap((user: User | null) => {
                 if (user) {
                     this.messageService.add({ 

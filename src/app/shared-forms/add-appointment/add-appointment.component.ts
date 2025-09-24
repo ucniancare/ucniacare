@@ -84,7 +84,7 @@ export class AddAppointmentComponent implements OnInit{
 
     protected onSubmit(): void {
         if (this.addAppointmentForm.valid) {
-            
+             
         } 
         else {
             this.addAppointmentForm.markAllAsTouched();
