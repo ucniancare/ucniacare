@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { from, map, Observable, switchMap, tap } from "rxjs";
+import { filter, from, map, Observable, switchMap, take, tap } from "rxjs";
 import { UserService } from "./user.service";
 import { UserAccount } from "../shared-interfaces/user-account";
 import { FirebaseService } from "./firebase.service";
@@ -28,6 +28,32 @@ export class FileUploadService {
     }
 
 
+    public createFolder(folderPath: string): Observable<string> {
+        return this.getAccessToken().pipe(
+            switchMap(accessToken => 
+                this.getOrCreateUserFolder(accessToken).pipe(
+                    switchMap(userFolderId => {
+                        if (folderPath) {
+                            return this.getOrCreateSubFolder(accessToken, userFolderId, folderPath);
+                        } 
+                        else {
+                            return from(Promise.resolve(userFolderId));
+                        }
+                    })
+                )
+            )
+        );
+    }
+
+    public uploadFileToFolder(file: File, folderId: string): Observable<any> {
+        this.spinnerOverlayService.show('Uploading file...');
+
+        return this.getAccessToken().pipe(
+            take(1),
+            switchMap(accessToken => this.uploadToFolder(accessToken, file, folderId))
+        );
+    }
+
     public uploadFile(file: File, folder?: string, clearExistingFiles: boolean = false): Observable<any> {
 
         this.spinnerOverlayService.show('Uploading file...');
@@ -45,7 +71,6 @@ export class FileUploadService {
                         }
                     }),
                     switchMap(targetFolderId => {
-
                         if (clearExistingFiles) {
                             return this.clearFolder(accessToken, targetFolderId).pipe(
                                 switchMap(() => this.uploadToFolder(accessToken, file, targetFolderId))
@@ -53,40 +78,6 @@ export class FileUploadService {
                         } else {
                             return this.uploadToFolder(accessToken, file, targetFolderId);
                         }
-
-                        /*const metadata = {
-                            name: file.name,
-                            mimeType: file.type,
-                            parents: [targetFolderId] 
-                        };
-
-                        const form = new FormData();
-                        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                        form.append('file', file);
-
-                        return this.http.post<any>(
-                            'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
-                            form,
-                            { headers: { Authorization: `Bearer ${accessToken}` } }
-                        ).pipe(
-                            switchMap(fileRes =>
-                                this.http.post(
-                                    `https://www.googleapis.com/drive/v3/files/${fileRes.id}/permissions`,
-                                    { role: 'reader', type: 'anyone' },
-                                    {
-                                        headers: {
-                                            Authorization: `Bearer ${accessToken}`,
-                                            'Content-Type': 'application/json'
-                                        }
-                                    }
-                                ).pipe(
-                                    map(() => {
-                                        this.spinnerOverlayService.hide();
-                                        return fileRes;
-                                    })
-                                )
-                            )
-                        );*/
                     })
                 )
             ),
@@ -139,15 +130,14 @@ export class FileUploadService {
         ).pipe(
             switchMap(res => {
                 if (!res.files || res.files.length === 0) {
-                    return from(Promise.resolve()); // nothing to delete
+                    return from(Promise.resolve());
                 }
     
-                // delete all files in parallel
                 const deleteRequests = res.files.map((file: any) =>
                     this.http.delete<void>(
                         `https://www.googleapis.com/drive/v3/files/${file.id}`,
                         { headers: { Authorization: `Bearer ${accessToken}` } }
-                    )
+                    ).toPromise()
                 );
     
                 return from(Promise.all(deleteRequests)).pipe(map(() => {}));
@@ -157,14 +147,18 @@ export class FileUploadService {
     
 
     private getAccessToken(): Observable<string> {
-        return this.firebaseService.getAllData$<GoogleToken>(COLLECTION.GOOGLE_TOKEN.COLLECTIONNAME).pipe(
-            map((tokens: (GoogleToken & { id: string; })[]) => {
-                if (tokens && tokens.length > 0) {
-                    return tokens[0].accessToken || '';
-                }
-                throw new Error('No Google access token found. Please generate a new token.');
-            })
-        );
+        return this.firebaseService
+            .getAllData$<GoogleToken>(COLLECTION.GOOGLE_TOKEN.COLLECTIONNAME)
+            .pipe(
+                filter(tokens => tokens && tokens.length > 0),
+                take(1),  // 🚨 prevents multiple emissions
+                map(tokens => {
+                    if (!tokens[0].accessToken) {
+                        throw new Error('No Google access token found.');
+                    }
+                    return tokens[0].accessToken;
+                })
+            );
     }
 
     private getOrCreateUserFolder(accessToken: string): Observable<string> {

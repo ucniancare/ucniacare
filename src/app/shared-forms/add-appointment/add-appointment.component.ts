@@ -17,6 +17,7 @@ import { COLLECTION } from '../../constants/firebase-collection.constants';
 import { tap, firstValueFrom } from 'rxjs';
 import { GOOGLEDRIVEFOLDERCONSTS } from '../../constants/google-drive-folders.constants';
 import { FileUploadService } from '../../shared-services/file-upload.service';
+import { ConfirmationService } from 'primeng/api';
 
 interface AppointmentTypeOption {
     name: string;
@@ -70,7 +71,8 @@ export class AddAppointmentComponent implements OnInit{
     constructor(
         private spinnerOverlayService: SpinnerOverlayService,
         private firebaseService: FirebaseService,
-        private fileUploadService: FileUploadService
+        private fileUploadService: FileUploadService,
+        private confirmationService: ConfirmationService
     ){
         
     }
@@ -80,6 +82,7 @@ export class AddAppointmentComponent implements OnInit{
     }
 
     protected onUploadFiles(event: FileSelectEvent) {
+        
         this.uploadedFiles = [...this.uploadedFiles, ...event.files];
     }
 
@@ -100,30 +103,30 @@ export class AddAppointmentComponent implements OnInit{
             this.isLoading.set(true);
             this.spinnerOverlayService.show('Adding appointment...');
 
-            // Process uploading files if any files are selected
-            if (this.uploadedFiles.length > 0) {
-                this.uploadFilesAndCreateAppointment();
-            } else {
-                this.createAppointment();
-            }
+            this.createAppointment();
         } 
         else {
             this.addAppointmentForm.markAllAsTouched();
         }
     }
 
-    private uploadFilesAndCreateAppointment(): void {
-        const uploadPromises = this.uploadedFiles.map(file => 
-            firstValueFrom(this.fileUploadService.uploadFile(file, GOOGLEDRIVEFOLDERCONSTS.APPOINTMENT_FILES))
-        );
+    private uploadFilesToAppointmentFolder(appointmentId: string): void {
+        const appointmentFolderPath = `${GOOGLEDRIVEFOLDERCONSTS.APPOINTMENT_FILES}/${appointmentId}`;
+        
+        firstValueFrom(this.fileUploadService.createFolder(appointmentFolderPath)).then(folderId => {
+            const uploadPromises = this.uploadedFiles.map(file => 
+                firstValueFrom(this.fileUploadService.uploadFileToFolder(file, folderId))
+            );
 
-        Promise.all(uploadPromises).then(() => {
-            this.createAppointment();
+            return Promise.all(uploadPromises);
+        }).then(() => {
+            this.isLoading.set(false);
+            this.spinnerOverlayService.hide();
+            this.showSuccessDialog();
         }).catch((error) => {
             console.error('Error uploading files:', error);
             this.isLoading.set(false);
             this.spinnerOverlayService.hide();
-            // You might want to show an error message to the user here
         });
     }
 
@@ -143,19 +146,42 @@ export class AddAppointmentComponent implements OnInit{
         }
 
         this.firebaseService.addData$<Appointment>(COLLECTION.APPOINTMENTS.COLLECTIONNAME, appointment).pipe(
-            tap((appointment: Appointment) => {
-                console.log("Appointment created successfully:", appointment);
-                this.isLoading.set(false);
-                this.spinnerOverlayService.hide();
-                this.resetForm();
+            tap((createdAppointment: Appointment & { id: string }) => {                
+                if (this.uploadedFiles.length > 0) {
+                    this.uploadFilesToAppointmentFolder(createdAppointment.id);
+                } 
+                else {
+                    this.isLoading.set(false);
+                    this.spinnerOverlayService.hide();
+                    this.showSuccessDialog();
+                }
             })
         ).subscribe({
             error: (error) => {
                 console.error('Error creating appointment:', error);
                 this.isLoading.set(false);
                 this.spinnerOverlayService.hide();
-                // You might want to show an error message to the user here
             }
+        });
+    }
+
+    private showSuccessDialog(): void {
+        this.confirmationService.confirm({
+            message: 'Appointment created successfully.',
+            header: 'Success',
+            icon: 'pi pi-check',
+            rejectVisible: false,
+            acceptButtonProps: {
+                label: 'OK',
+                severity: 'primary',
+                size: 'small',
+            },
+            accept: () => {
+                this.resetForm();
+            },
+            reject: () => {
+                this.resetForm();
+            },
         });
     }
 

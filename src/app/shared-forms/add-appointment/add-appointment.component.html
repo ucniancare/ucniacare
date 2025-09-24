@@ -37,18 +37,12 @@
         </p-floatlabel>
         <div class="mt-4">
             <p-fileupload 
-                mode="basic" 
-                name="demo[]" 
-                chooseIcon="pi pi-upload" 
-                maxFileSize="10000000" 
-                [customUpload]="true" 
-                (onSelect)="onUploadFiles($event)" 
-                [auto]="false" 
-                chooseLabel="Upload Files"
-                [multiple]="true"
-                [showUploadButton]="false"
-                [showCancelButton]="false">
-            </p-fileupload>
+            mode="basic" 
+            name="demo[]" 
+            chooseIcon="pi pi-upload"
+            (onSelect)="onUploadFiles($event)" 
+            [multiple]="true"
+            maxFileSize="1000000" [auto]="true" chooseLabel="Browse" />
             <div class="text-center text-sm mt-4 text-gray-500">
                 <p>You can upload multiple files related to this appointment.</p>
                 <p>Example: Prescription, Test Results, Medical Reports, etc.</p>
