@@ -23,7 +23,7 @@ import { DataSecurityService } from '../shared-services/data-security.service';
 import { User } from '../shared-interfaces/user';
 import { UserService } from '../shared-services/user.service';
 import { UserModel } from '../shared-models/user.model';
-import { OTPTemplateForm } from '../shared-interfaces/otp';
+import { OTPTemplateForm } from '../shared-interfaces/email-template-form';
 import { OTPUtil } from '../shared-utils/otp-util';
 import { InputOtpModule } from 'primeng/inputotp';
 import { ChangePasswordData, ChangePasswordService } from '../change-password/change-password.service';

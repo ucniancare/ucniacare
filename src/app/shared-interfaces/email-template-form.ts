@@ -6,3 +6,12 @@ export class OTPTemplateForm {
     validUntil?: string;
     [key: string]: unknown;
 }
+
+export class AccountDetailsTemplateForm {
+    email?: string;
+    name?: string;
+    ucIdNumber?: string;
+    password?: string;
+    [key: string]: unknown;
+}
+

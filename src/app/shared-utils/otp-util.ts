@@ -1,4 +1,4 @@
-import { OTPTemplateForm } from "../shared-interfaces/otp";
+import { OTPTemplateForm } from "../shared-interfaces/email-template-form";
 
 export class OTPUtil {
 

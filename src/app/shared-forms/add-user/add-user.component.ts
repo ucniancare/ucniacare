@@ -17,6 +17,7 @@ import { catchError, forkJoin, of, tap , concatMap, finalize } from 'rxjs';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { PasswordUtil } from '../../shared-utils/password-util';
+import { StringUtil } from '../../shared-utils/string-util';
 import { APPCONSTS } from '../../constants/data.constants';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
@@ -27,13 +28,9 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { UserService } from '../../shared-services/user.service';   
 import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
 import { Config } from '@angular/fire/auth';
-
-interface DropdownOption {
-    name: string;
-}
-
-
-
+import { EmailJsService, sendEmailType } from '../../shared-services/email-js.service';
+import { AccountDetailsTemplateForm } from '../../shared-interfaces/email-template-form';
+import { DropdownOption } from '../../shared-interfaces/dropdown-option';
 
 @Component({
     selector: 'add-user',
@@ -103,17 +100,17 @@ export class AddUserComponent {
     protected isLoading = signal<boolean>(false);
 
     protected addUserForm = new FormGroup({
-        ucIdNumber: new FormControl(null, [Validators.required]),
-        firstName: new FormControl('', [Validators.required]),
-        middleName: new FormControl(''),
-        lastName: new FormControl('', [Validators.required]),
-        extName: new FormControl(null),
-        sex: new FormControl(null, [Validators.required]),
-        email: new FormControl('', [Validators.required, Validators.email]),
-        phoneNumber: new FormControl('', [Validators.required]),
-        dateOfBirth: new FormControl(null, [Validators.required]),
-        maritalStatus: new FormControl(null, [Validators.required]),
-        userRoles: new FormControl(null, [Validators.required]),
+        ucIdNumber: new FormControl<number | null>(null, [Validators.required]),
+        firstName: new FormControl<string>('', [Validators.required]),
+        middleName: new FormControl<string>(''),
+        lastName: new FormControl<string>('', [Validators.required]),
+        extName: new FormControl<DropdownOption | null>(null),
+        sex: new FormControl<DropdownOption | null>(null, [Validators.required]),
+        email: new FormControl<string>('', [Validators.required, Validators.email]),
+        phoneNumber: new FormControl<string>('', [Validators.required]),
+        dateOfBirth: new FormControl<Date | null>(null, [Validators.required]),
+        maritalStatus: new FormControl<DropdownOption | null>(null, [Validators.required]),
+        userRoles: new FormControl<DropdownOption[] | null>(null, [Validators.required]),
     });
 
     constructor(
@@ -122,7 +119,8 @@ export class AddUserComponent {
         private messageService: MessageService,
         private userService: UserService,
         private spinnerOverlayService: SpinnerOverlayService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private emailJsService: EmailJsService
     ) {}
 
     ngOnInit() {
@@ -312,9 +310,9 @@ export class AddUserComponent {
                 isFirstLogin: true,
                 metaData: {
                     createdAt: new Date(),
-                    createdBy: 'system',
+                    createdBy: APPCONSTS.SYSTEM,
                     updatedAt: new Date(),
-                    updatedBy: 'system'
+                    updatedBy: APPCONSTS.SYSTEM
                 }
             };
             
@@ -342,9 +340,9 @@ export class AddUserComponent {
                 email: userData.email,
                 metaData: {
                     createdAt: new Date(),
-                    createdBy: 'system',
+                    createdBy: APPCONSTS.SYSTEM,
                     updatedAt: new Date(),
-                    updatedBy: 'system'
+                    updatedBy: APPCONSTS.SYSTEM
                 }
             };
             
@@ -373,8 +371,28 @@ export class AddUserComponent {
 
             console.log(`Successfully created user: ${userData.firstName} ${userData.lastName} with password: ${generatedPassword}`);
             
+            // Send email with account details
+            const completeName = StringUtil.buildCompleteName(user.firstName!, user.middleName, user.lastName!, user.extName);
+            const emailData: AccountDetailsTemplateForm = {
+                email: userData.email,
+                name: completeName,
+                ucIdNumber: userData.ucIdNumber,
+                password: generatedPassword
+            };
+            
+            this.emailJsService.sendEmail({
+                data: emailData,
+                type: sendEmailType.ACCOUNT_DETAILS
+            }).subscribe(emailSent => {
+                if (emailSent) {
+                    console.log(`Account details email sent successfully to: ${userData.email}`);
+                } else {
+                    console.warn(`Failed to send account details email to: ${userData.email}`);
+                }
+            });
+            
             return {
-                completeName: this.buildCompleteName(user.firstName!, user.middleName, user.lastName!, user.extName),
+                completeName: completeName,
                 ucIdNumber: userData.ucIdNumber,
                 password: generatedPassword,
                 email: userData.email
@@ -414,13 +432,6 @@ export class AddUserComponent {
         }
     }
 
-    private buildCompleteName(firstName: string, middleName?: string, lastName?: string, extName?: string): string {
-        let completeName = firstName;
-        if (middleName) completeName += ` ${middleName}`;
-        if (lastName) completeName += ` ${lastName}`;
-        if (extName) completeName += ` ${extName}`;
-        return completeName;
-    }
 
     protected downloadImportedUsersExcel(): void {
         if (this.importedUsersData.length === 0) {
@@ -509,13 +520,13 @@ export class AddUserComponent {
                         firstName: addUserFormValue.firstName!,
                         middleName: addUserFormValue.middleName!,
                         lastName: addUserFormValue.lastName!,
-                        extName: addUserFormValue.extName!,
-                        sex: addUserFormValue.sex!,
+                        extName: addUserFormValue.extName?.name,
+                        sex: addUserFormValue.sex?.name,
                         email: addUserFormValue.email!,
                         phoneNumber: addUserFormValue.phoneNumber!,
                         dateOfBirth: addUserFormValue.dateOfBirth!,
-                        maritalStatus: addUserFormValue.maritalStatus!,
-                        userRoles: addUserFormValue.userRoles!,
+                        maritalStatus: addUserFormValue.maritalStatus?.name,
+                        userRoles: addUserFormValue.userRoles?.map(role => role.name) || [],
                         metaData: {
                             createdAt: new Date(),
                             createdBy: this.userService.getCurrentUser()?.id?? APPCONSTS.SYSTEM,
@@ -528,25 +539,47 @@ export class AddUserComponent {
                 tap(success => {
                     if (success) {
                         this.spinnerOverlayService.hide();
-                        this.confirmationService.confirm({
-                            target: event?.target as EventTarget,
-                            message: 'User added successfully. A temporary password has been sent to the user\'s email.',
-                            header: 'Success',
-                            icon: 'pi pi-check',
-                            rejectVisible: false,
-                            acceptButtonProps: {
-                                label: 'OK',
-                                severity: 'primary',
-                                size: 'small',
-                            },
-                
-                            accept: () => {
-                                this.addUserForm.reset();
-
-                            },
-                            reject: () => {
-                                this.addUserForm.reset();
-                            },
+                        const completeName = StringUtil.buildCompleteName(
+                            addUserFormValue.firstName!, 
+                            addUserFormValue.middleName || undefined, 
+                            addUserFormValue.lastName!, 
+                            addUserFormValue.extName?.name || undefined
+                        );
+                        
+                        const emailData: AccountDetailsTemplateForm = {
+                            email: addUserFormValue.email!,
+                            name: completeName,
+                            ucIdNumber: String(addUserFormValue.ucIdNumber!),
+                            password: password
+                        };
+                        
+                        this.emailJsService.sendEmail({
+                            data: emailData,
+                            type: sendEmailType.ACCOUNT_DETAILS
+                        }).subscribe(emailSent => {
+                            const message = emailSent 
+                                ? 'User added successfully. Account details have been sent to the user\'s email.'
+                                : 'User added successfully. However, there was an issue sending the account details email.';
+                            
+                            this.confirmationService.confirm({
+                                target: event?.target as EventTarget,
+                                message: message,
+                                header: 'Success',
+                                icon: 'pi pi-check',
+                                rejectVisible: false,
+                                acceptButtonProps: {
+                                    label: 'OK',
+                                    severity: 'primary',
+                                    size: 'small',
+                                },
+                    
+                                accept: () => {
+                                    this.addUserForm.reset();
+                                },
+                                reject: () => {
+                                    this.addUserForm.reset();
+                                },
+                            });
                         });
                     }
                     else {

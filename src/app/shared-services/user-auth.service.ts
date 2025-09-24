@@ -8,12 +8,13 @@ import { UserService } from './user.service';
 import { DataSecurityService } from './data-security.service';
 import { LOCALSTORAGECONSTS } from '../constants/local-storage.constants';
 import { User } from '../shared-interfaces/user';
-import { EmailJsService } from './email-js.service';
-import { OTPTemplateForm } from '../shared-interfaces/otp';
+import { EmailJsService, sendEmailType } from './email-js.service';
+import { OTPTemplateForm } from '../shared-interfaces/email-template-form';
 import { OTPModel } from '../shared-models/otp.model';
 import { MessageService } from 'primeng/api';
 import { ChangePasswordService } from '../change-password/change-password.service';
 import { Router } from '@angular/router';
+import { sendEmailData } from './email-js.service';
 
 
 @Injectable({
@@ -79,6 +80,7 @@ export class UserAuthService {
     }
 
     public logoutUser(): Observable<boolean> {
+        this.localStorageService.clear();
         return this.firebaseService.updateData$(COLLECTION.USERACCOUNTS.COLLECTIONNAME, this.userService.getCurrentUserAccount()!.id!, { isLoggedIn: false, }).pipe(
             map(() => {
                 this.localStorageService.clear();
@@ -127,7 +129,11 @@ export class UserAuthService {
                 }
                 
                 if (result) {
-                    return this.emailJsService.sendEmail(data);
+                    const sendEmailData: sendEmailData = {
+                        data: data,
+                        type: sendEmailType.OTP
+                    };
+                    return this.emailJsService.sendEmail(sendEmailData);
                 } else {
                     console.error('Failed to add OTP to Firebase');
                     return of(false);
