@@ -73,7 +73,7 @@
             </div>
         </div>
         <div class="mt-6">
-            <p-button type="submit" label="Submit" severity="primary" icon="fa-solid fa-check" iconPos="right" fluid (click)="onSubmit()" />
+            <p-button (click)="onAddAppointment()" type="submit" label="Submit" severity="primary" fluid [disabled]="addAppointmentForm.invalid || isLoading()" />
         </div>
 
     </form>

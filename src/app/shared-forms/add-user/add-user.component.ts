@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
@@ -100,6 +100,7 @@ export class AddUserComponent {
     protected processingProgress: number = 0;
     protected processingStatus: string = '';
     protected importedUsersData: any[] = [];
+    protected isLoading = signal<boolean>(false);
 
     protected addUserForm = new FormGroup({
         ucIdNumber: new FormControl(null, [Validators.required]),
@@ -479,9 +480,10 @@ export class AddUserComponent {
         window.location.href = APPCONSTS.ADD_USER_EXCEL_TEMPLATE_URL;
     }
 
-    protected addUser(): void {
+    protected onAddUser(): void {
 
         if (this.addUserForm.valid) {
+            this.isLoading.set(true);
             this.spinnerOverlayService.show('Creating user...');
             const addUserFormValue = this.addUserForm.value;
             const password = PasswordUtil.generatePassword(8);
@@ -563,7 +565,7 @@ export class AddUserComponent {
                 }),
                 finalize(() => {
                     this.spinnerOverlayService.hide();
-                    
+                    this.isLoading.set(false);
                 })
             ).subscribe();
         } 

@@ -6,8 +6,9 @@ export class Appointment {
     type?: string;
     notes?: string;
     date?: Date;
-    time?: string;
-    prefferedDoctor?: string;
+    to?: string;
+    from?: string;
+    attendingStaff?: string[];
     files?: string[];
     attendingDoctors?: string[];
     attendingNurses?: string[];

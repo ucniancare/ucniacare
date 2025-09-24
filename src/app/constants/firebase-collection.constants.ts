@@ -41,4 +41,13 @@ export const COLLECTION = {
             TIME: 'time',
         },
     },
+    APPOINTMENTS: {
+        COLLECTIONNAME: 'appointments',
+        FIELDS: {
+            TYPE: 'type',
+            DATE: 'date',
+            FROM: 'from',
+            TO: 'to',
+        },
+    },
 }

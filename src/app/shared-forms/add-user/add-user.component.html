@@ -116,7 +116,7 @@
                 User Roles is required
             </div>
             <div class="mt-4">
-                <p-button (click)="addUser()" label="Add User" icon="fa-solid fa-user-plus" fluid/>
+                <p-button (click)="onAddUser()" label="Add User" icon="fa-solid fa-user-plus" [disabled]="addUserForm.invalid || isLoading()" fluid/>
             </div>
 
         </form>
