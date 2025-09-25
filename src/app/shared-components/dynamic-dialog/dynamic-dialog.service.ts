@@ -5,6 +5,7 @@ export interface DynamicDialogData {
     component: Type<any>;
     title: string;
     width?: string;
+    onClose?: () => void;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -22,6 +22,7 @@ import { LOCALSTORAGECONSTS } from '../constants/local-storage.constants';
 import { DynamicDialogData, DynamicDialogService } from '../shared-components/dynamic-dialog/dynamic-dialog.service';
 import { AddUserComponent } from '../shared-forms/add-user/add-user.component';
 import { AddAppointmentComponent } from '../shared-forms/add-appointment/add-appointment.component';
+import { BulletinCardComponent } from '../shared-components/bulletin-card/bulletin-card.component';
 interface UploadEvent {
     originalEvent: Event;
     files: File[];
@@ -42,7 +43,8 @@ interface ContactForm {
         VitalSignsCardComponent,
         CommonModule,
         FileUploadModule,
-        HttpClientModule
+        HttpClientModule,
+        BulletinCardComponent
     ],
     templateUrl: './dashboard.component.html',
     styleUrl: './dashboard.component.css',
