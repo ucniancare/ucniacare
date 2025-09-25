@@ -1,60 +1,60 @@
-    import { Component, signal } from '@angular/core';
-    import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-    import { SelectButtonModule } from 'primeng/selectbutton';
-    import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
-    import { CommonModule } from '@angular/common';
-    import { DividerModule } from 'primeng/divider';
-    import * as XLSX from 'xlsx';
-    import { FirebaseService } from '../../shared-services/firebase.service';
-    import { DataSecurityService } from '../../shared-services/data-security.service';
-    import { UserAccount } from '../../shared-interfaces/user-account';
-    import { User } from '../../shared-interfaces/user';
-    import { UserAccountModel } from '../../shared-models/user-account.model';
-    import { UserModel } from '../../shared-models/user.model';
-    import { COLLECTION } from '../../constants/firebase-collection.constants';
-    import { ConfirmationService, MessageService } from 'primeng/api';
-    import { catchError, forkJoin, of, tap, concatMap, finalize, map } from 'rxjs';
-    import { ProgressBarModule } from 'primeng/progressbar';
-    import { ButtonModule } from 'primeng/button';
-    import { PasswordUtil } from '../../shared-utils/password-util';
-    import { StringUtil } from '../../shared-utils/string-util';
-    import { APPCONSTS } from '../../constants/data.constants';
-    import { FloatLabelModule } from 'primeng/floatlabel';
-    import { InputTextModule } from 'primeng/inputtext';
-    import { InputNumberModule } from 'primeng/inputnumber';
-    import { SelectModule } from 'primeng/select';
-    import { DatePickerModule } from 'primeng/datepicker';
-    import { MultiSelectModule } from 'primeng/multiselect';
-    import { UserService } from '../../shared-services/user.service';   
-    import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
-    import { Config } from '@angular/fire/auth';
-    import { EmailJsService, sendEmailType, sendEmailData } from '../../shared-services/email-js.service';
-    import { AccountDetailsTemplateForm } from '../../shared-interfaces/email-template-form';
-    import { DropdownOption } from '../../shared-interfaces/dropdown-option';
+import { Component, signal } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
+import { CommonModule } from '@angular/common';
+import { DividerModule } from 'primeng/divider';
+import * as XLSX from 'xlsx';
+import { FirebaseService } from '../../shared-services/firebase.service';
+import { DataSecurityService } from '../../shared-services/data-security.service';
+import { UserAccount } from '../../shared-interfaces/user-account';
+import { User } from '../../shared-interfaces/user';
+import { UserAccountModel } from '../../shared-models/user-account.model';
+import { UserModel } from '../../shared-models/user.model';
+import { COLLECTION } from '../../constants/firebase-collection.constants';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { catchError, forkJoin, of, tap, concatMap, finalize, map } from 'rxjs';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ButtonModule } from 'primeng/button';
+import { PasswordUtil } from '../../shared-utils/password-util';
+import { StringUtil } from '../../shared-utils/string-util';
+import { APPCONSTS } from '../../constants/data.constants';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { UserService } from '../../shared-services/user.service';   
+import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
+import { Config } from '@angular/fire/auth';
+import { EmailJsService, sendEmailType, sendEmailData } from '../../shared-services/email-js.service';
+import { AccountDetailsTemplateForm } from '../../shared-interfaces/email-template-form';
+import { DropdownOption } from '../../shared-interfaces/dropdown-option';
 
-    @Component({
-    selector: 'add-user',
-    imports: [
-        FormsModule,
-        SelectButtonModule,
-        FileUploadModule,
-        CommonModule,
-        DividerModule,
-        ProgressBarModule,
-        ButtonModule,
-        FloatLabelModule,
-        ReactiveFormsModule,
-        InputTextModule,
-        InputNumberModule,
-        SelectModule,
-        DatePickerModule,
-        MultiSelectModule
-    ],
-    templateUrl: './add-user.component.html',
-    styleUrl: './add-user.component.css',
-    standalone: true
-    })
-    export class AddUserComponent {
+@Component({
+selector: 'add-user',
+imports: [
+    FormsModule,
+    SelectButtonModule,
+    FileUploadModule,
+    CommonModule,
+    DividerModule,
+    ProgressBarModule,
+    ButtonModule,
+    FloatLabelModule,
+    ReactiveFormsModule,
+    InputTextModule,
+    InputNumberModule,
+    SelectModule,
+    DatePickerModule,
+    MultiSelectModule
+],
+templateUrl: './add-user.component.html',
+styleUrl: './add-user.component.css',
+standalone: true
+})
+export class AddUserComponent {
 
     protected userRoleOptions: DropdownOption[] = [
         { name: 'Super Admin' },
@@ -97,17 +97,17 @@
             {name: 'Industrial Arts'},
         ]},
         {name: 'General Academic Strand (GAS)'},
-      ];
-    
+    ];
+
     protected collegeDepartmentOptions: DropdownOption[] = [
-        {name: 'College Of Computer Studies', children: [
+        {name: 'College of Computer Studies', children: [
             {name: 'Bachelor of Science in Information Technology (BSIT)'},
             {name: 'Bachelor of Science in Computer Science (BSCS)'},
             {name: 'Bachelor of Science in Information Systems (BSIS)'},
             {name: 'Bachelor of Science in Computer Engineering (BSCpE)'},
             {name: 'Bachelor of Science in Computer Science Major in Artificial Intelligence (BSCS-AI)'},
         ]},
-        {name: 'College Of Engineering & Architecture', children: [
+        {name: 'College of Engineering & Architecture', children: [
             {name: 'Bachelor of Science in Civil Engineering (BSCE)'},
             {name: 'Bachelor of Science in Mechanical Engineering (BSME)'},
             {name: 'Bachelor of Science in Electrical Engineering (BSEE)'},
@@ -115,7 +115,7 @@
             {name: 'Bachelor of Science in Chemical Engineering (BSChE)'},
             {name: 'Bachelor of Science in Architecture (BSArch)'},
         ]},
-        {name: 'College Of Business & Management', children: [
+        {name: 'College of Business & Management', children: [
             {name: 'Bachelor of Science in Business Administration (BSBA)'},
             {name: 'Bachelor of Science in Accountancy (BSA / BSAcc)'},
             {name: 'Bachelor of Science in Accounting Information System (BSAIS)'},
@@ -124,7 +124,7 @@
             {name: 'Bachelor of Science in Tourism Management (BSTM)'},
             {name: 'Bachelor of Science in Real Estate Management (BSREM)'},
         ]},
-        {name: 'College Of Education', children: [
+        {name: 'College of Education', children: [
             {name: 'Bachelor of Secondary Education (BSEd)'},
             {name: 'Majors: English, Mathematics, Science, Social Studies, etc.'},
             {name: 'Bachelor of Elementary Education (BEEd)'},
@@ -132,7 +132,7 @@
             {name: 'Bachelor of Technology and Livelihood Education (BTLEd)'},
             {name: 'Bachelor of Early Childhood Education (BECEd)'},
         ]},
-        {name: 'College Of Health & Allied Sciences', children: [
+        {name: 'College of Health & Allied Sciences', children: [
             {name: 'Bachelor of Science in Nursing (BSN)'},
             {name: 'Bachelor of Science in Pharmacy (BSPharm)'},
             {name: 'Bachelor of Science in Medical Technology (BSMT)'},
@@ -156,7 +156,7 @@
         {name: 'Grade 11', children: this.seniorHighSchoolStrandOptions},
         {name: 'Grade 12', children: this.seniorHighSchoolStrandOptions},
     ];
-    
+
     protected collegeLevelOptions: DropdownOption[] = [
         {name: 'Year Level 1', children: this.collegeDepartmentOptions},
         {name: 'Year Level 2', children: this.collegeDepartmentOptions},
@@ -219,8 +219,6 @@
         { name: 'Not Applicable' }
     ];
 
-    
-    
     protected selectedSex: DropdownOption = this.sexOptions[0];
     protected selectedMaritalStatus: DropdownOption = this.maritalStatusOptions[0];
     protected selectedExtName: DropdownOption = this.extNameOptions[0];
@@ -229,6 +227,7 @@
         { label: 'Manual', value: 'manual' },
         { label: 'Import Excel File', value: 'import' }
     ];
+
     protected selectedState: string = 'manual';
     protected isProcessing: boolean = false;
     protected processingProgress: number = 0;
@@ -280,6 +279,7 @@
             this.processExcelFile(event.files[0]);
         }
     }
+
     // This is for the import excel file
     private processExcelFile(file: File): void {
         this.isProcessing = true;
@@ -543,7 +543,7 @@
         }
         console.log(user.educationalAttainment);
         if (userData.userRoles?.length > 0) user.userRoles = userData.userRoles;
-       
+        
         return user;
     }
 
@@ -597,7 +597,6 @@
             return null;
         }
     }
-
 
     protected downloadImportedUsersExcel(): void {
         if (this.importedUsersData.length === 0) {
@@ -779,7 +778,5 @@
         else {
             this.addUserForm.markAllAsTouched();
         }
-
     }
-
-    }
+}
