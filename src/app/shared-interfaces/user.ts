@@ -1,7 +1,8 @@
 import { MetaData } from "./meta-data";
+import { EducationalAttainment } from "./educational-attainment";
 
 export class User {
-    id?: string 
+    id?: string;
     userAccountId?: string;
     firstName?: string;
     lastName?: string;
@@ -12,6 +13,7 @@ export class User {
     email?: string;
     phoneNumber?: string;
     dateOfBirth?: Date;
+    educationalAttainment?: EducationalAttainment;
     userRoles?: string[];
     profilePicture?: string;
     metaData?: MetaData;

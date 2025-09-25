@@ -115,10 +115,54 @@
             <div *ngIf="addUserForm.get('userRoles')?.invalid && addUserForm.get('userRoles')?.touched" class="text-red-500 text-sm mt-1">
                 User Roles is required
             </div>
+
+                        
+            <!-- Education Level -->
+            <p-floatlabel variant="on" class="mt-4">
+                <p-select formControlName="educationLevel" inputId="educationLevel" [options]="educationLevelOptions" optionLabel="name" appendTo="body" fluid
+                (onChange)="onEducationLevelChange($event.value)" />
+                <label for="educationLevel">Education Level</label>
+            </p-floatlabel>
+            <div *ngIf="addUserForm.get('educationLevel')?.invalid && addUserForm.get('educationLevel')?.touched" 
+                class="text-red-500 text-sm mt-1">
+                Education Level is required
+            </div>
+            
+            <p-floatlabel variant="on" class="mt-4" *ngIf="yearLevelOptions.length > 0">
+                <p-select formControlName="yearLevel" inputId="yearLevel" [options]="yearLevelOptions" optionLabel="name" appendTo="body" fluid (onChange)="onYearLevelChange($event.value)" />
+                <label for="yearLevel">{{ selectedEducation === 'College' ? 'Year Level' : 'Grade Level' }}</label>
+            </p-floatlabel>
+
+            <div *ngIf="addUserForm.get('yearLevel')?.invalid && addUserForm.get('yearLevel')?.touched" 
+                class="text-red-500 text-sm mt-1">
+                Year Level is required
+            </div>
+
+            <!-- Program (shows only if there are children) -->
+            <p-floatlabel variant="on" class="mt-4" *ngIf="programOptions.length > 0">
+                <p-select formControlName="program" inputId="program" [options]="programOptions" optionLabel="name" appendTo="body" (onChange)="onProgramChange($event.value)" fluid />
+                <label for="program">{{ selectedEducation === 'College' ? 'Department' : 'Strand' }}</label>
+            </p-floatlabel>
+
+            <div *ngIf="addUserForm.get('program')?.invalid && addUserForm.get('program')?.touched" 
+                class="text-red-500 text-sm mt-1">
+                Program is required
+            </div>
+            
+            <p-floatlabel variant="on" class="mt-4" *ngIf="specializationOptions.length > 0">
+                <p-select formControlName="specialization" inputId="specialization" [options]="specializationOptions" optionLabel="name" appendTo="body" fluid />
+                <label for="specialization">Specialization</label>
+            </p-floatlabel>
+            
+            <div *ngIf="addUserForm.get('specialization')?.invalid && addUserForm.get('specialization')?.touched" 
+                class="text-red-500 text-sm mt-1">
+                Specialization is required
+            </div>
+            
             <div class="mt-4">
                 <p-button (click)="onAddUser()" label="Add User" icon="fa-solid fa-user-plus" [disabled]="addUserForm.invalid || isLoading()" fluid/>
             </div>
-
+       
         </form>
     </div>
     

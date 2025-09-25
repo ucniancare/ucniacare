@@ -17,6 +17,7 @@ export class UserModel {
             phoneNumber: json.phoneNumber,
             dateOfBirth: json.dateOfBirth,
             maritalStatus: json.maritalStatus,
+            educationalAttainment: json.educationalAttainment,
             userRoles: json.userRoles,
             profilePicture: json.profilePicture,
             metaData: json.metaData
@@ -36,6 +37,7 @@ export class UserModel {
             ...(user.phoneNumber !== undefined && { phoneNumber: user.phoneNumber }),
             ...(user.dateOfBirth !== undefined && { dateOfBirth: user.dateOfBirth }),
             ...(user.maritalStatus !== undefined && { maritalStatus: user.maritalStatus }),
+            ...(user.educationalAttainment !== undefined && { educationalAttainment: user.educationalAttainment }),
             ...(user.userRoles !== undefined && { userRoles: user.userRoles }),
             ...(user.profilePicture !== undefined && { profilePicture: user.profilePicture }),
             ...(user.metaData !== undefined && { metaData: user.metaData })
@@ -55,6 +57,7 @@ export class UserModel {
             phoneNumber: user.phoneNumber,
             dateOfBirth: user.dateOfBirth,
             maritalStatus: user.maritalStatus,
+            educationalAttainment: user.educationalAttainment,
             userRoles: user.userRoles,
             profilePicture: user.profilePicture,
             metaData: user.metaData

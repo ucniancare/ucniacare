@@ -1,38 +1,38 @@
-import { Component, signal } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
-import { CommonModule } from '@angular/common';
-import { DividerModule } from 'primeng/divider';
-import * as XLSX from 'xlsx';
-import { FirebaseService } from '../../shared-services/firebase.service';
-import { DataSecurityService } from '../../shared-services/data-security.service';
-import { UserAccount } from '../../shared-interfaces/user-account';
-import { User } from '../../shared-interfaces/user';
-import { UserAccountModel } from '../../shared-models/user-account.model';
-import { UserModel } from '../../shared-models/user.model';
-import { COLLECTION } from '../../constants/firebase-collection.constants';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { catchError, forkJoin, of, tap, concatMap, finalize, map } from 'rxjs';
-import { ProgressBarModule } from 'primeng/progressbar';
-import { ButtonModule } from 'primeng/button';
-import { PasswordUtil } from '../../shared-utils/password-util';
-import { StringUtil } from '../../shared-utils/string-util';
-import { APPCONSTS } from '../../constants/data.constants';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { SelectModule } from 'primeng/select';
-import { DatePickerModule } from 'primeng/datepicker';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { UserService } from '../../shared-services/user.service';   
-import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
-import { Config } from '@angular/fire/auth';
-import { EmailJsService, sendEmailType, sendEmailData } from '../../shared-services/email-js.service';
-import { AccountDetailsTemplateForm } from '../../shared-interfaces/email-template-form';
-import { DropdownOption } from '../../shared-interfaces/dropdown-option';
+    import { Component, signal } from '@angular/core';
+    import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+    import { SelectButtonModule } from 'primeng/selectbutton';
+    import { FileUploadModule, UploadEvent } from 'primeng/fileupload';
+    import { CommonModule } from '@angular/common';
+    import { DividerModule } from 'primeng/divider';
+    import * as XLSX from 'xlsx';
+    import { FirebaseService } from '../../shared-services/firebase.service';
+    import { DataSecurityService } from '../../shared-services/data-security.service';
+    import { UserAccount } from '../../shared-interfaces/user-account';
+    import { User } from '../../shared-interfaces/user';
+    import { UserAccountModel } from '../../shared-models/user-account.model';
+    import { UserModel } from '../../shared-models/user.model';
+    import { COLLECTION } from '../../constants/firebase-collection.constants';
+    import { ConfirmationService, MessageService } from 'primeng/api';
+    import { catchError, forkJoin, of, tap, concatMap, finalize, map } from 'rxjs';
+    import { ProgressBarModule } from 'primeng/progressbar';
+    import { ButtonModule } from 'primeng/button';
+    import { PasswordUtil } from '../../shared-utils/password-util';
+    import { StringUtil } from '../../shared-utils/string-util';
+    import { APPCONSTS } from '../../constants/data.constants';
+    import { FloatLabelModule } from 'primeng/floatlabel';
+    import { InputTextModule } from 'primeng/inputtext';
+    import { InputNumberModule } from 'primeng/inputnumber';
+    import { SelectModule } from 'primeng/select';
+    import { DatePickerModule } from 'primeng/datepicker';
+    import { MultiSelectModule } from 'primeng/multiselect';
+    import { UserService } from '../../shared-services/user.service';   
+    import { SpinnerOverlayService } from '../../shared-services/primeng-services/spinner-overlay.service';
+    import { Config } from '@angular/fire/auth';
+    import { EmailJsService, sendEmailType, sendEmailData } from '../../shared-services/email-js.service';
+    import { AccountDetailsTemplateForm } from '../../shared-interfaces/email-template-form';
+    import { DropdownOption } from '../../shared-interfaces/dropdown-option';
 
-@Component({
+    @Component({
     selector: 'add-user',
     imports: [
         FormsModule,
@@ -53,8 +53,8 @@ import { DropdownOption } from '../../shared-interfaces/dropdown-option';
     templateUrl: './add-user.component.html',
     styleUrl: './add-user.component.css',
     standalone: true
-})
-export class AddUserComponent {
+    })
+    export class AddUserComponent {
 
     protected userRoleOptions: DropdownOption[] = [
         { name: 'Super Admin' },
@@ -64,6 +64,140 @@ export class AddUserComponent {
         { name: 'Nurse' },
         { name: 'Staff' }
     ];
+
+    protected preschoolLevelOptions: DropdownOption[] = [
+        {name: 'Kinder 1'},
+        {name: 'Kinder 2'},
+    ];
+
+    protected elementaryLevelOptions: DropdownOption[] = [
+        {name: 'Grade 1'},
+        {name: 'Grade 2'},
+        {name: 'Grade 3'},
+        {name: 'Grade 4'},
+        {name: 'Grade 5'},
+        {name: 'Grade 6'},
+    ];
+
+    protected juniorHighSchoolLevelOptions: DropdownOption[] = [
+        {name: 'Grade 7'},
+        {name: 'Grade 8'},
+        {name: 'Grade 9'},
+        {name: 'Grade 10'},
+    ];
+
+    protected seniorHighSchoolStrandOptions: DropdownOption[] = [
+        {name: 'Science, Technology, Engineering, and Mathematics (STEM)'},
+        {name: 'Humanities and Social Sciences (HUMSS)'},
+        {name: 'Accountancy, Business, and Management (ABM)'},
+        {name: 'Technical-Vocational-Livelihood (TVL)', children: [
+            {name: 'Information and Communications Technology (ICT)'},
+            {name: 'Home Economics (HE)'},
+            {name: 'Agri-Fishery Arts'},
+            {name: 'Industrial Arts'},
+        ]},
+        {name: 'General Academic Strand (GAS)'},
+      ];
+    
+    protected collegeDepartmentOptions: DropdownOption[] = [
+        {name: 'College Of Computer Studies', children: [
+            {name: 'Bachelor of Science in Information Technology (BSIT)'},
+            {name: 'Bachelor of Science in Computer Science (BSCS)'},
+            {name: 'Bachelor of Science in Information Systems (BSIS)'},
+            {name: 'Bachelor of Science in Computer Engineering (BSCpE)'},
+            {name: 'Bachelor of Science in Computer Science Major in Artificial Intelligence (BSCS-AI)'},
+        ]},
+        {name: 'College Of Engineering & Architecture', children: [
+            {name: 'Bachelor of Science in Civil Engineering (BSCE)'},
+            {name: 'Bachelor of Science in Mechanical Engineering (BSME)'},
+            {name: 'Bachelor of Science in Electrical Engineering (BSEE)'},
+            {name: 'Bachelor of Science in Electronics and Communications Engineering (BSECE)'},
+            {name: 'Bachelor of Science in Chemical Engineering (BSChE)'},
+            {name: 'Bachelor of Science in Architecture (BSArch)'},
+        ]},
+        {name: 'College Of Business & Management', children: [
+            {name: 'Bachelor of Science in Business Administration (BSBA)'},
+            {name: 'Bachelor of Science in Accountancy (BSA / BSAcc)'},
+            {name: 'Bachelor of Science in Accounting Information System (BSAIS)'},
+            {name: 'Bachelor of Science in Entrepreneurship (BSEntrep)'},
+            {name: 'Bachelor of Science in Hospitality Management (BSHM)'},
+            {name: 'Bachelor of Science in Tourism Management (BSTM)'},
+            {name: 'Bachelor of Science in Real Estate Management (BSREM)'},
+        ]},
+        {name: 'College Of Education', children: [
+            {name: 'Bachelor of Secondary Education (BSEd)'},
+            {name: 'Majors: English, Mathematics, Science, Social Studies, etc.'},
+            {name: 'Bachelor of Elementary Education (BEEd)'},
+            {name: 'Bachelor of Physical Education (BPEd)'},
+            {name: 'Bachelor of Technology and Livelihood Education (BTLEd)'},
+            {name: 'Bachelor of Early Childhood Education (BECEd)'},
+        ]},
+        {name: 'College Of Health & Allied Sciences', children: [
+            {name: 'Bachelor of Science in Nursing (BSN)'},
+            {name: 'Bachelor of Science in Pharmacy (BSPharm)'},
+            {name: 'Bachelor of Science in Medical Technology (BSMT)'},
+            {name: 'Bachelor of Science in Radiologic Technology (BSRT)'},
+            {name: 'Bachelor of Science in Physical Therapy (BSPT)'},
+            {name: 'Bachelor of Science in Occupational Therapy (BSOT)'},
+            {name: 'Doctor of Medicine (MD)'},
+            {name: 'Doctor of Veterinary Medicine (DVM)'},
+            {name: 'College of Arts, Humanities & Social Sciences:'},
+            {name: 'Bachelor of Arts in Communication (ABComm)'},
+            {name: 'Bachelor of Arts in Political Science (ABPolSci)'},
+            {name: 'Bachelor of Arts in English (ABEng)'},
+            {name: 'Bachelor of Arts in Psychology (ABPsych)'},
+            {name: 'Bachelor of Science in Psychology (BSPsych)'},
+            {name: 'Bachelor of Arts in Social Sciences (ABSocSci)'},
+            {name: 'Bachelor of Fine Arts (BFA)'},
+        ]},
+    ];
+
+    protected seniorHighSchoolLevelOptions: DropdownOption[] = [
+        {name: 'Grade 11', children: this.seniorHighSchoolStrandOptions},
+        {name: 'Grade 12', children: this.seniorHighSchoolStrandOptions},
+    ];
+    
+    protected collegeLevelOptions: DropdownOption[] = [
+        {name: 'Year Level 1', children: this.collegeDepartmentOptions},
+        {name: 'Year Level 2', children: this.collegeDepartmentOptions},
+        {name: 'Year Level 3', children: this.collegeDepartmentOptions},
+        {name: 'Year Level 4', children: this.collegeDepartmentOptions},
+    ];
+
+    protected educationLevelOptions: DropdownOption[] = [
+        { name: 'Preschool' , children: this.preschoolLevelOptions},
+        { name: 'Elementary' , children: this.elementaryLevelOptions},
+        { name: 'Junior High School' , children: this.juniorHighSchoolLevelOptions},
+        { name: 'Senior High School' , children: this.seniorHighSchoolLevelOptions},
+        { name: 'College' , children: this.collegeLevelOptions},
+    ];
+
+    protected yearLevelOptions: DropdownOption[] = [];
+    protected programOptions: DropdownOption[] = [];
+    protected selectedEducation: string | null = null;
+    protected specializationOptions: DropdownOption[] = [];
+
+    onEducationLevelChange(selected: DropdownOption) {
+        this.selectedEducation = selected?.name ?? null;
+        this.yearLevelOptions = selected?.children ?? [];
+        this.specializationOptions = [];
+        this.programOptions = []; // reset
+        this.addUserForm.get('yearLevel')?.reset();
+        this.addUserForm.get('program')?.reset();
+        this.addUserForm.get('specialization')?.reset();
+    }
+
+    onYearLevelChange(selected: DropdownOption) {
+        this.programOptions = selected?.children ?? [];
+        this.specializationOptions = [];
+        this.addUserForm.get('program')?.reset();
+        this.addUserForm.get('specialization')?.reset();
+    }
+
+    onProgramChange(selected: DropdownOption) {
+        this.specializationOptions = selected?.children ?? [];
+        this.addUserForm.get('specialization')?.reset();
+    }
 
     protected sexOptions: DropdownOption[] = [
         { name: 'Male' },
@@ -84,6 +218,9 @@ export class AddUserComponent {
         { name: 'V' },
         { name: 'Not Applicable' }
     ];
+
+    
+    
     protected selectedSex: DropdownOption = this.sexOptions[0];
     protected selectedMaritalStatus: DropdownOption = this.maritalStatusOptions[0];
     protected selectedExtName: DropdownOption = this.extNameOptions[0];
@@ -111,6 +248,10 @@ export class AddUserComponent {
         dateOfBirth: new FormControl<Date | null>(null, [Validators.required]),
         maritalStatus: new FormControl<DropdownOption | null>(null, [Validators.required]),
         userRoles: new FormControl<DropdownOption[] | null>(null, [Validators.required]),
+        educationLevel: new FormControl<DropdownOption | null>(null, [Validators.required]),
+        yearLevel: new FormControl<DropdownOption | null>(null),
+        program: new FormControl<DropdownOption | null>(null),
+        specialization: new FormControl<DropdownOption | null>(null),
     });
 
     constructor(
@@ -281,6 +422,18 @@ export class AddUserComponent {
                     case 'maritalstatus':
                         userData.maritalStatus = value;
                         break;
+                    case 'educationlevel':
+                        userData.educationLevel = value;
+                        break;
+                    case 'yearlevel':
+                        userData.yearLevel = value;
+                        break;
+                    case 'program':
+                        userData.program = value;
+                        break;
+                    case 'specialization':
+                        userData.specialization = value;
+                        break;
                     case 'userroles':
                         userData.userRoles = value.split(',').map((role: string) => role.trim());
                         break;
@@ -380,8 +533,17 @@ export class AddUserComponent {
         if (userData.phoneNumber) user.phoneNumber = userData.phoneNumber;
         if (userData.dateOfBirth) user.dateOfBirth = userData.dateOfBirth;
         if (userData.maritalStatus) user.maritalStatus = userData.maritalStatus;
+        if (userData.educationLevel || userData.yearLevel || userData.program || userData.specialization) {
+            user.educationalAttainment = {
+                ...(userData.educationLevel && { educationLevel: userData.educationLevel }),
+                ...(userData.yearLevel && { yearLevel: userData.yearLevel }),
+                ...(userData.program && { program: userData.program }),
+                ...(userData.specialization && { specialization: userData.specialization })
+            };
+        }
+        console.log(user.educationalAttainment);
         if (userData.userRoles?.length > 0) user.userRoles = userData.userRoles;
-
+       
         return user;
     }
 
@@ -429,7 +591,7 @@ export class AddUserComponent {
                     return dateValue;
                 }
             }
-    
+
             return null;
         } catch (error) {
             return null;
@@ -530,6 +692,12 @@ export class AddUserComponent {
                         phoneNumber: addUserFormValue.phoneNumber!,
                         dateOfBirth: addUserFormValue.dateOfBirth!,
                         maritalStatus: addUserFormValue.maritalStatus?.name,
+                        educationalAttainment: {
+                            educationLevel: addUserFormValue.educationLevel?.name,
+                            yearLevel: addUserFormValue.yearLevel?.name,
+                            program: addUserFormValue.program?.name,
+                            specialization: addUserFormValue.specialization?.name
+                        },
                         userRoles: addUserFormValue.userRoles?.map(role => role.name) || [],
                         metaData: {
                             createdAt: new Date(),
@@ -614,4 +782,4 @@ export class AddUserComponent {
 
     }
 
-}
+    }
